@@ -77,7 +77,12 @@ class GameActor extends GameObject {
 		super( parent, params )
 		this.elem = this.parse_html( params.template )
 		
-		this.props.style = {}
+		this.props.style = {
+			translateX: 0,
+			translateY: 0,
+			scale: 1
+		}
+		
 		this.props.data = {}
 
 		if ( parent instanceof GameActor ) {
@@ -130,6 +135,21 @@ class GameActor extends GameObject {
 		})
 	}
 
+	animate ( duration, easing, style ) {
+
+		this.props.tasker.add({
+			timeout: duration,
+			lambda: ()=>{
+				TweenLite.to(this.props.style, duration, _.merge(style, {
+					ease: easing,
+					onUpdate: ()=>{
+						this.update()
+					}
+				}))	
+			}
+		})
+	}
+
 	set_inner_html( html ) { this.elem.innerHTML = html; }
 	set_data_attribute( name, value ) { this.elem.dataset[name] = value; }
 
@@ -157,7 +177,7 @@ class Task extends GameObject {
 			this.props.lambda( this )
 		}
 
-		if (this.props.timeout > 0) {
+		if (this.props.timeout >= 0) {
 			setTimeout( ()=> this.finish(), (this.props.timeout * 1000)/*seconds*/)
 		}
 	}
@@ -196,8 +216,6 @@ class Tasker extends GameObject {
 	}
 }
 
-
-
 class Game extends GameActor {
 	constructor ( parent, params ) {
 		super( parent, _.merge(params, {
@@ -210,8 +228,10 @@ class Game extends GameActor {
 				classic: {
 					min_combination_length: 3,
 					rule_set: [ 
-						[ "x - 1", "x + 1" ], 
-						[ "y - 1", "y + 1" ] 
+						[ "x = x - 1", "x = x + 1" ], 
+						[ "y = y - 1", "y = y + 1" ],
+						// [ "x = x - 1; y = y - 1", "x = x + 1; y = y + 1" ],
+						// [ "x = x - 1; y = y + 1", "x = x + 1; y = y - 1" ],
 					]
 				}
 			},
@@ -221,15 +241,19 @@ class Game extends GameActor {
 			paused: true,
 			min_combination_length: 3,
 			chosen_gem: null,
-			colors_count: 6,
-			field_size: 10,
-			rule_name: "classic"
+			max_colors_count: 6,
+			field_size: 8,
+			rule_name: "classic",
+			fill_solve_max_iterations: 50
 		}, this.props)
+
+		if (this.props.min_combination_length < 2) this.props.min_combination_length = 2
 
 		this.props.field = new Field( this, {
 			size: this.props.field_size,
-			colors_count: this.props.colors_count,
+			max_colors_count: this.props.max_colors_count,
 			min_combination_length: this.props.min_combination_length,
+			fill_solve_max_iterations: this.props.fill_solve_max_iterations,
 			rules: this.get_rules()
 		} )
 
@@ -268,12 +292,13 @@ class Field extends GameActor {
 		} )
 	}
 
-	restart ( rule_set, min_combination_length ) {
+	restart ( rule_set ) {
 		this.destroy_children()
-		this.fill()
+		this.fill(0)
+
 	}
 
-	fill ( /*boolean*/free_mode, rule_set, min_combination_length ) {
+	fill ( /*int*/fill_mode ) {
 		this.for_xy( this.props.size, this.props.size, ( x, y )=> {
 			if ( this.props.content[x][y] === null ) {
 
@@ -282,14 +307,53 @@ class Field extends GameActor {
 					y: y,
 					field_size: this.props.size,
 					color: -1,
-					colors_count: this.props.colors_count
+					max_colors_count: this.props.max_colors_count
 				} )
 
-
-				this.props.content[x][y] = new_gem
+				new_gem.animate(0, "none", { translateY: -500, scale: 0.75 })
 				
+				this.props.content[x][y] = new_gem		
+				
+				if (fill_mode == 0){
+					let max_iter_count = this.props.fill_solve_max_iterations
+					let iter_id = 0
+
+					let combination = this.get_combinations(new_gem)
+					while( combination != null && iter_id < max_iter_count ) {
+						iter_id++
+						new_gem.update_color(-1)
+						combination = this.get_combinations(new_gem)
+						// console.log(combination)
+					}
+				}
 			}
 		} )
+
+		if (fill_mode == 1){
+			this.for_xy(this.props.size, this.props.size, ( x, y )=>{
+				let gem = this.props.content[x][y]
+				let max_iter_count = this.props.fill_solve_max_iterations
+				let iter_id = 0
+
+				let combination = this.get_combinations(gem)
+				while( combination === null && iter_id < max_iter_count) {
+					iter_id++
+					gem.update_color(-1)
+					combination = this.get_combinations(gem)
+				}
+			}  )
+		}
+
+		this.for_xy(this.props.size, this.props.size, ( x, y )=>{
+			let gem = this.props.content[x][y]
+			
+			gem.animate(0.444, "none", {
+				translateY: 0,
+				scale: 1
+			})
+
+		}  )
+	
 	}
 
 	for_xy( x, y, callback ) {
@@ -307,53 +371,60 @@ class Field extends GameActor {
 		let y = gem.props.y
 		let result_gem = null
 
-		console.log()
-
-		console.log("rule_string", rule_string)
-
-
-
-		eval( rule_string )
-
+		eval(rule_string)
+		
 		if ( this.is_valid_gem_index( x, y ) ) {
-			result_gem = this.props.content[x][y]
-			
-			if ( gem.creates_combination(result_gem) || this.array_contains( exclusion, result_gem ) ) {
+			result_gem = this.props.content[x][y]			
+			if ( !gem.creates_combination(result_gem) || this.array_contains( exclusion, result_gem ) ) {
 				result_gem = null
 			}
-
 		}
-
-		
 
 		return result_gem
 	}
 
 	get_neighbours( gem, /*array*/rule_string, exclusion ) {
-		let result = [gem]
+		let result = []
 
-		console.log("rule_string", rule_string)
+		if (!this.array_contains(exclusion, gem)){
+			result.push(gem)
+		}
 
-		let neighbour_gem = this.get_neighbour(gem, rule_string, result )
+		let neighbour_gem = this.get_neighbour(gem, rule_string, exclusion.concat(result) )
 
-		console.log(neighbour_gem)
+		if (neighbour_gem){
+			let new_exclusion = exclusion.concat(result)
+			let new_neighbours = this.get_neighbours(neighbour_gem, rule_string, new_exclusion)
 
+			result = result.concat(new_neighbours)
+		}
 
 		if (result.length === 0) result = null
 		return result
 	}
 
-	get_combination( gem, rule_strings ){
+	print_gems_array(array){
+		let print_string = ""
+
+		_.forEach(array, (gem)=>{
+			print_string += `gem{ x:${gem.props.x}:${gem.props.y} } `
+		})
+
+		return print_string
+	}
+
+	get_combination( gem, rule_strings, min_combination_length ){
 		let result_combination = []
 
-		console.log("rule_strings", rule_strings)
 
 		_.forEach( rule_strings, ( rule_string )=>{
 			let neighbours = this.get_neighbours( gem, rule_string, result_combination )
-			if (neighbours != null) result_combination.concat(neighbours)
+			if (neighbours != null) result_combination = result_combination.concat(neighbours)
 		} )
 
-		if (result_combination.length === 0) result_combination = null
+
+		
+		if (result_combination.length < min_combination_length) result_combination = null
 		return result_combination
 
 	}
@@ -361,12 +432,11 @@ class Field extends GameActor {
 	get_combinations ( gem ) {
 		let result_combinations = []
 
-		console.log("rules", this.props.rules.rule_set)
 
 		_.forEach( this.props.rules.rule_set, ( rule_strings )=>{
-			let combination = this.get_combination( gem, rule_strings )
+			let combination = this.get_combination( gem, rule_strings, this.props.min_combination_length )
 
-			if (combination != null && combination.length >= this.props.rules.min_combination_length ) {
+			if (combination != null ) {
 				result_combinations.push ( combination )
 			}
 		})
@@ -378,7 +448,6 @@ class Field extends GameActor {
 
 	on_gem_clicked ( gem, evt ) {
 		let combinations = this.get_combinations( gem )
-		console.log(combinations)
 	}
 }
 
@@ -398,23 +467,22 @@ class Gem extends GameActor {
 	}
 	
 	compute ( style, data ) {
-		style.width = `${100 / this.props.field_size }%`
-		style.height = `${100 / this.props.field_size }%`
+		style.width = `${100 / this.props.field_size * this.props.style.scale }%`
+		style.height = `${100 / this.props.field_size * this.props.style.scale }%`
 		style["font-size"] = "1em"
-		style.top = `${ (100 / this.props.field_size) * this.props.x }%`
-		style.left = `${ (100 / this.props.field_size) * this.props.y }%`
+		style.top = `calc(${ (100 / this.props.field_size) * this.props.y }% + ${this.props.style.translateY}px)`
+		style.left = `calc(${ (100 / this.props.field_size) * this.props.x }% + ${this.props.style.translateX}px)`
 
 		data.alive = this.props.is_alive
 		data.x = this.props.x
 		data.y = this.props.y
 
 		if (this.props.color < 0) {
-			data.color = this.props.color = Math.floor((Math.random() * this.props.colors_count))
+			data.color = this.props.color = Math.floor((Math.random() * this.props.max_colors_count))
 		}
 	}
 
 	creates_combination ( gem ) {
-		console.log(gem, gem.props.color, this.props.color)
 		return gem && gem.props.color === this.props.color
 	}
 
@@ -424,8 +492,7 @@ class Gem extends GameActor {
 	}
 
 	update_color(colorId/**-1 for random */){
-		let color
-		this.props.color = color
+		this.props.color = colorId
 		this.update()
 	}
 
@@ -440,7 +507,7 @@ class Gem extends GameActor {
 		this.parent.on_gem_clicked( this, evt )
 	}
 
-	gem_styles = [
+	gem_style = [
 		{ icon: '⚜' },
 		{ icon: '☣' },
 		{ icon: '♗' },
