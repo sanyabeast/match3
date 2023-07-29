@@ -1,0 +1,23 @@
+{
+  "name": "match3",
+  "version": "1.0.0",
+  "description": "Created for fun in 2013.\r [Launch](https://sanyabeast.github.io/match3/)",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "php -S localhost:8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanyabeast/match3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sanyabeast/match3/issues"
+  },
+  "homepage": "https://github.com/sanyabeast/match3#readme"
+}
