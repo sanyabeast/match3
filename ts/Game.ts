@@ -503,29 +503,37 @@ export class Game {
   private findAndProcessNewMatches(): void {
     let newCluster: GemPosition[] = [];
     
-    // Use a more efficient approach to check for matches
-    // Only check positions that have gems above them (potential new matches)
+    // Check the entire board for matches
     for (let j = 0; j < this.board.size; j++) {
       for (let k = 0; k < this.board.size; k++) {
         const gem = this.board.getGem(j, k);
         if (gem.state === GemState.ALIVE) {
-          // Only check for matches if this gem was recently placed
-          // (This optimization assumes newly placed gems are more likely to form matches)
-          if (j === 0 || this.board.getGem(j-1, k).state === GemState.DEAD) {
-            const matches = this.board.matchChain(j, k);
-            if (matches.length > 0) {
-              newCluster = newCluster.concat(matches);
+          const matches = this.board.matchChain(j, k);
+          if (matches.length > 0) {
+            // Add unique matches to the cluster
+            for (const match of matches) {
+              // Check if this position is already in the cluster
+              const isDuplicate = newCluster.some(
+                pos => pos.j === match.j && pos.k === match.k
+              );
+              
+              if (!isDuplicate) {
+                newCluster.push(match);
+              }
             }
           }
         }
       }
     }
     
-    // If new matches found, kill them with a shorter delay
+    // If new matches found, kill them and continue the cascade
     if (newCluster.length > 0) {
+      console.log(`Found ${newCluster.length} new matches in cascade`);
+      // Process these matches, which will trigger another round of
+      // shiftDown and findAndProcessNewMatches when complete
       this.kill(newCluster);
     } else {
-      // No new matches, resume gameplay immediately
+      // No new matches, resume gameplay
       this.pause = false;
     }
   }
