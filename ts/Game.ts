@@ -46,6 +46,175 @@ export class Game {
   }
 
   private initEventListeners(): void {
+    // Variables to track drag operations
+    let isDragging = false;
+    let startGem: HTMLElement | null = null;
+    let startJ = -1;
+    let startK = -1;
+    let dragThreshold = 10; // Minimum pixels to consider a drag
+    let startX = 0;
+    let startY = 0;
+    
+    // Handle touch start and mouse down
+    const handleStart = (event: MouseEvent | TouchEvent) => {
+      // Game must not be paused
+      if (this.pause) return;
+      
+      // Get the target element
+      const target = (event.target as HTMLElement);
+      
+      // Only process events on gem elements
+      if (!target.classList.contains(CSS_CLASSES.GEM)) return;
+      
+      // Get the starting coordinates
+      if (event instanceof MouseEvent) {
+        startX = event.clientX;
+        startY = event.clientY;
+      } else {
+        // Touch event
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+      }
+      
+      // Record the starting gem
+      startGem = target;
+      startJ = parseInt(target.getAttribute(DATA_ATTRIBUTES.J) || '0', 10);
+      startK = parseInt(target.getAttribute(DATA_ATTRIBUTES.K) || '0', 10);
+      
+      // Add visual feedback
+      this.board.getGem(startJ, startK).elem.classList.add(CSS_CLASSES.CHOSEN);
+      this.soundManager.play(SoundManager.SOUND_EFFECTS.TURN);
+      
+      // Start dragging
+      isDragging = true;
+    };
+    
+    // Handle touch move and mouse move
+    const handleMove = (event: MouseEvent | TouchEvent) => {
+      // Only process if we're dragging
+      if (!isDragging || !startGem) return;
+      
+      // Prevent default behavior (scrolling, etc.)
+      event.preventDefault();
+      
+      // Get current coordinates
+      let currentX: number, currentY: number;
+      
+      if (event instanceof MouseEvent) {
+        currentX = event.clientX;
+        currentY = event.clientY;
+      } else {
+        // Touch event
+        currentX = event.touches[0].clientX;
+        currentY = event.touches[0].clientY;
+      }
+      
+      // Calculate the distance moved
+      const deltaX = currentX - startX;
+      const deltaY = currentY - startY;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      // Add dragging class for visual feedback
+      if (distance > dragThreshold / 2) {
+        startGem.classList.add(CSS_CLASSES.DRAGGING);
+      }
+      
+      // If we've moved enough to consider it a drag
+      if (distance > dragThreshold) {
+        // Determine the predominant direction (horizontal or vertical)
+        const isHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
+        
+        // Calculate the target position based on direction
+        let targetJ = startJ;
+        let targetK = startK;
+        
+        if (isHorizontal) {
+          // Horizontal movement
+          targetK = startK + (deltaX > 0 ? 1 : -1);
+        } else {
+          // Vertical movement
+          targetJ = startJ + (deltaY > 0 ? 1 : -1);
+        }
+        
+        // Check if the target position is valid
+        if (
+          targetJ >= 0 && targetJ < this.board.size &&
+          targetK >= 0 && targetK < this.board.size &&
+          this.board.isCorrectTurn(startJ, startK, targetJ, targetK)
+        ) {
+          // End the drag operation
+          isDragging = false;
+          
+          // Remove visual feedback classes
+          startGem.classList.remove(CSS_CLASSES.DRAGGING);
+          this.board.getGem(startJ, startK).elem.classList.remove(CSS_CLASSES.CHOSEN);
+          
+          // Temporarily disable further interactions
+          this.pause = true;
+          
+          // Swap the gems
+          this.board.swap(startJ, startK, targetJ, targetK);
+          
+          // Place gems immediately for visual feedback
+          this.board.getGem(startJ, startK).place();
+          this.board.getGem(targetJ, targetK).place();
+          this.soundManager.play(SoundManager.SOUND_EFFECTS.SWAP);
+          
+          // Check for matches
+          this.cluster = this.board.matchChain(startJ, startK);
+          this.cluster = this.cluster.concat(this.board.matchChain(targetJ, targetK));
+          
+          if (this.cluster.length === 0) {
+            // No matches found, swap back with shorter delay
+            setTimeout(() => {
+              this.board.swap(targetJ, targetK, startJ, startK);
+              this.board.getGem(startJ, startK).place();
+              this.board.getGem(targetJ, targetK).place();
+              // Re-enable interactions
+              this.pause = false;
+            }, DEFAULT_SETTINGS.SWAP_DELAY / 2);
+          } else {
+            // Matches found, remove them
+            this.kill(this.cluster);
+          }
+        }
+      }
+    };
+    
+    // Handle touch end and mouse up
+    const handleEnd = () => {
+      // Only process if we were dragging
+      if (!isDragging || !startGem) return;
+      
+      // End the drag operation
+      isDragging = false;
+      
+      // Remove visual feedback classes
+      startGem.classList.remove(CSS_CLASSES.DRAGGING);
+      
+      // Remove highlight if we didn't complete a swap
+      if (this.board.getGem(startJ, startK).elem.classList.contains(CSS_CLASSES.CHOSEN)) {
+        this.board.getGem(startJ, startK).elem.classList.remove(CSS_CLASSES.CHOSEN);
+      }
+      
+      // Reset starting values
+      startGem = null;
+      startJ = -1;
+      startK = -1;
+    };
+    
+    // Add event listeners for mouse interactions
+    this.field.addEventListener('mousedown', handleStart);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+    
+    // Add event listeners for touch interactions
+    this.field.addEventListener('touchstart', handleStart, { passive: false });
+    document.addEventListener('touchmove', handleMove, { passive: false });
+    document.addEventListener('touchend', handleEnd);
+    
+    // Keep the original click handler for backward compatibility
+    // but with modified behavior to work with the new drag system
     this.field.addEventListener('click', (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       
@@ -64,7 +233,6 @@ export class Game {
         this.chosen = true;
         this.chosenJ = j;
         this.chosenK = k;
-        console.log(`Selected gem: ${j}x${k}, color: ${this.board.getGem(j, k).color}, state: ${this.board.getGem(j, k).state}`);
         this.board.getGem(j, k).elem.classList.add(CSS_CLASSES.CHOSEN);
         this.soundManager.play(SoundManager.SOUND_EFFECTS.TURN);
       } else {

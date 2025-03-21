@@ -15,7 +15,9 @@ export const ELEMENT_IDS = {
 export const CSS_CLASSES = {
   GEM: 'gem',
   CHOSEN: 'chosen',
-  DEAD: 'dead'
+  DEAD: 'dead',
+  DRAGGING: 'dragging',
+  DRAG_TARGET: 'drag-target'
 };
 
 // Game States
