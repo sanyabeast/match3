@@ -38,10 +38,10 @@ export const DEFAULT_SETTINGS = {
   INITIAL_COLORS: 6,
   INITIAL_TIME: 60,
   FIELD_SIZE: 500, // pixels
-  ANIMATION_DELAY: 600, // milliseconds
-  SWAP_DELAY: 500, // milliseconds
-  KILL_DELAY: 300, // milliseconds
-  LEVEL_START_DELAY: 1000, // milliseconds
+  ANIMATION_DELAY: 200, // milliseconds
+  SWAP_DELAY: 200, // milliseconds
+  KILL_DELAY: 150, // milliseconds
+  LEVEL_START_DELAY: 500, // milliseconds
   COUNTDOWN_INTERVAL: 1000, // milliseconds
   SCORE_MULTIPLIER: 36
 };

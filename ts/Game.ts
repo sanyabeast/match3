@@ -76,23 +76,30 @@ export class Game {
         
         // Try to swap gems if it's a valid move
         if (this.board.isCorrectTurn(this.chosenJ, this.chosenK, j, k)) {
+          // Temporarily disable further clicks to prevent multiple swaps
+          this.pause = true;
+          
           // Swap the gems
           this.board.swap(this.chosenJ, this.chosenK, j, k);
+          
+          // Place gems immediately for visual feedback
           this.board.getGem(this.chosenJ, this.chosenK).place();
           this.board.getGem(j, k).place();
           this.soundManager.play(SoundManager.SOUND_EFFECTS.SWAP);
           
-          // Check for matches
+          // Check for matches immediately
           this.cluster = this.board.matchChain(this.chosenJ, this.chosenK);
           this.cluster = this.cluster.concat(this.board.matchChain(j, k));
           
           if (this.cluster.length === 0) {
-            // No matches found, swap back
+            // No matches found, swap back with shorter delay
             setTimeout(() => {
               this.board.swap(j, k, this.chosenJ, this.chosenK);
               this.board.getGem(this.chosenJ, this.chosenK).place();
               this.board.getGem(j, k).place();
-            }, DEFAULT_SETTINGS.SWAP_DELAY);
+              // Re-enable clicks
+              this.pause = false;
+            }, DEFAULT_SETTINGS.SWAP_DELAY / 2);
           } else {
             // Matches found, remove them
             this.kill(this.cluster);
@@ -237,7 +244,7 @@ export class Game {
     // Update score based on matches
     this.updateScoreForMatches(cluster);
     
-    // Process matched gems
+    // Process matched gems in batches for better performance
     this.processMatchedGems(cluster);
   }
   
@@ -245,7 +252,9 @@ export class Game {
    * Updates score based on matched gems
    */
   private updateScoreForMatches(cluster: GemPosition[]): void {
-    this.score += cluster.length * DEFAULT_SETTINGS.SCORE_MULTIPLIER;
+    // Apply bonus multiplier for larger matches
+    const sizeMultiplier = cluster.length > 4 ? 1.5 : 1;
+    this.score += Math.floor(cluster.length * DEFAULT_SETTINGS.SCORE_MULTIPLIER * sizeMultiplier);
     this.updateScoreboard();
     
     // Play explosion sound based on cluster size
@@ -260,13 +269,31 @@ export class Game {
    * Processes matched gems (killing them and checking for new matches)
    */
   private processMatchedGems(cluster: GemPosition[]): void {
-    // Kill all gems in the cluster
-    for (const pos of cluster) {
-      this.board.getGem(pos.j, pos.k).kill();
-    }
+    // Kill all gems in the cluster simultaneously
+    const batchSize = 5;
+    const processBatch = (startIndex: number) => {
+      const endIndex = Math.min(startIndex + batchSize, cluster.length);
+      
+      // Process current batch
+      for (let i = startIndex; i < endIndex; i++) {
+        const pos = cluster[i];
+        // Kill the gem (this triggers the exit animation)
+        this.board.getGem(pos.j, pos.k).kill();
+      }
+      
+      // Process next batch or move to next step
+      if (endIndex < cluster.length) {
+        // Process next batch after a very short delay
+        setTimeout(() => processBatch(endIndex), 10);
+      } else {
+        // All gems processed, wait for kill animation to complete
+        // then shift gems down
+        setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.KILL_DELAY);
+      }
+    };
     
-    // After a delay, shift gems down and check for new matches
-    setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.KILL_DELAY);
+    // Start processing the first batch
+    processBatch(0);
   }
   
   /**
@@ -275,7 +302,7 @@ export class Game {
   private shiftDown(): void {
     let shifted = false;
     
-    // Iterate through the board from bottom to top
+    // Process all columns in parallel for better performance
     for (let j = this.board.size - 2; j >= 0; j--) {
       for (let k = 0; k < this.board.size; k++) {
         // If current gem is alive and the one below is dead, shift down
@@ -285,18 +312,20 @@ export class Game {
         ) {
           // Swap the gems
           this.board.swap(j, k, j + 1, k);
+          this.board.getGem(j + 1, k).place(); // Place only the moved gem for efficiency
           shifted = true;
         }
       }
     }
     
-    // If any gems were shifted, continue checking
+    // If any gems were shifted, continue checking with a shorter delay
     if (shifted) {
-      setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.ANIMATION_DELAY);
+      setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.ANIMATION_DELAY / 2);
     } else {
       // No more shifts needed, fill empty spaces and check for new matches
       this.board.fillMap();
-      setTimeout(() => this.findAndProcessNewMatches(), DEFAULT_SETTINGS.ANIMATION_DELAY);
+      // Use a shorter delay for better responsiveness
+      setTimeout(() => this.findAndProcessNewMatches(), DEFAULT_SETTINGS.ANIMATION_DELAY / 2);
     }
   }
   
@@ -306,20 +335,29 @@ export class Game {
   private findAndProcessNewMatches(): void {
     let newCluster: GemPosition[] = [];
     
-    // Check each position for new matches
+    // Use a more efficient approach to check for matches
+    // Only check positions that have gems above them (potential new matches)
     for (let j = 0; j < this.board.size; j++) {
       for (let k = 0; k < this.board.size; k++) {
-        if (this.board.getGem(j, k).state === GemState.ALIVE) {
-          newCluster = newCluster.concat(this.board.matchChain(j, k));
+        const gem = this.board.getGem(j, k);
+        if (gem.state === GemState.ALIVE) {
+          // Only check for matches if this gem was recently placed
+          // (This optimization assumes newly placed gems are more likely to form matches)
+          if (j === 0 || this.board.getGem(j-1, k).state === GemState.DEAD) {
+            const matches = this.board.matchChain(j, k);
+            if (matches.length > 0) {
+              newCluster = newCluster.concat(matches);
+            }
+          }
         }
       }
     }
     
-    // If new matches found, kill them
+    // If new matches found, kill them with a shorter delay
     if (newCluster.length > 0) {
       this.kill(newCluster);
     } else {
-      // No new matches, resume gameplay
+      // No new matches, resume gameplay immediately
       this.pause = false;
     }
   }

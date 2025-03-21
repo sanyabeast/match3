@@ -151,7 +151,11 @@ export class Board {
     for (let j = 0; j < this._size; j++) {
       for (let k = 0; k < this._size; k++) {
         if (this._gems[j][k].state === GemState.DEAD) {
-          this.createNewGem(j, k);
+          // Remove the old dead gem element from the DOM
+          this._gems[j][k].elem.remove();
+          
+          // Create a completely new gem element
+          this.createBrandNewGem(j, k);
         }
       }
     }
@@ -164,12 +168,41 @@ export class Board {
   }
 
   /**
-   * Creates a new gem at the specified position
+   * Creates a completely new gem element at the specified position
    */
-  private createNewGem(j: number, k: number): void {
+  private createBrandNewGem(j: number, k: number): void {
+    // Create a new DOM element for the gem
+    const gemElement = document.createElement('div');
+    gemElement.className = CSS_CLASSES.GEM;
+    gemElement.setAttribute(DATA_ATTRIBUTES.J, j.toString());
+    gemElement.setAttribute(DATA_ATTRIBUTES.K, k.toString());
+    
+    // Set the gem size
+    gemElement.style.width = DEFAULT_SETTINGS.FIELD_SIZE / this._size - 1 + 'px';
+    gemElement.style.height = DEFAULT_SETTINGS.FIELD_SIZE / this._size - 1 + 'px';
+    gemElement.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (this._size * 2) + 'px';
+    
+    // Calculate how far above the board this gem should start
+    // The higher the row (smaller j), the further above the board
+    const offsetMultiplier = j < 3 ? 3 - j : 1;
+    const startingYPosition = -((offsetMultiplier + 1) * DEFAULT_SETTINGS.FIELD_SIZE / this._size);
+    
+    // Position the gem initially above the board for animation
+    gemElement.style.top = `${startingYPosition}px`;
+    gemElement.style.left = k * DEFAULT_SETTINGS.FIELD_SIZE / this._size + 'px';
+    
+    // Add some initial transform for a more dynamic entrance
+    gemElement.style.transform = `scale(0.8) rotate(${Math.random() * 20 - 10}deg)`;
+    gemElement.style.opacity = '0.9';
+    
+    // Add the gem element to the board
+    this._element.appendChild(gemElement);
+    
+    // Create a new Gem object
+    this._gems[j][k] = new Gem(gemElement, this._size);
+    
     // Set the gem to alive state
     this._gems[j][k].state = GemState.ALIVE;
-    this._gems[j][k].elem.classList.remove(CSS_CLASSES.DEAD);
     
     // Find a valid color that doesn't create matches
     let color;
@@ -179,8 +212,17 @@ export class Board {
     
     // Set the gem color
     this._gems[j][k].color = color;
-    this._gems[j][k].elem.setAttribute(DATA_ATTRIBUTES.COLOR, String(color));
-    this._gems[j][k].elem.innerHTML = GEM_SYMBOLS[color];
+    gemElement.setAttribute(DATA_ATTRIBUTES.COLOR, String(color));
+    gemElement.innerHTML = GEM_SYMBOLS[color];
+  }
+
+  /**
+   * Creates a new gem at the specified position (deprecated, kept for reference)
+   */
+  private createNewGem(j: number, k: number): void {
+    // This method is now deprecated in favor of createBrandNewGem
+    // which creates completely new DOM elements instead of reusing old ones
+    this.createBrandNewGem(j, k);
   }
 
   /**
