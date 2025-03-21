@@ -1,0 +1,28 @@
+{
+  "name": "match3",
+  "version": "1.0.0",
+  "description": "Match3 game refactored to TypeScript",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "match3",
+    "game",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jquery": "^3.5.16",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.80.0",
+    "webpack-cli": "^5.0.2"
+  },
+  "dependencies": {
+    "jquery": "^3.6.4"
+  }
+}
