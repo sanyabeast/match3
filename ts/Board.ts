@@ -1,6 +1,7 @@
 import { CSS_CLASSES, DATA_ATTRIBUTES, DEFAULT_SETTINGS, GemState, GEM_SYMBOLS } from './constants';
 import { Gem } from './Gem';
 import { GemPosition } from './types';
+import { SoundManager } from './SoundManager';
 
 /**
  * Represents the game board in the Match3 game
@@ -11,12 +12,14 @@ export class Board {
   private _element: HTMLElement;
   private _minLine: number;
   private _colors: number;
+  private _soundManager: SoundManager;
 
   constructor(element: HTMLElement, size: number, minLine: number, colors: number) {
     this._element = element;
     this._size = size;
     this._minLine = minLine;
     this._colors = colors;
+    this._soundManager = SoundManager.getInstance();
     
     this.createMap(size, minLine, colors);
   }
@@ -152,6 +155,9 @@ export class Board {
         }
       }
     }
+    
+    // Play fill sound
+    this._soundManager.play(SoundManager.SOUND_EFFECTS.FILL);
     
     // Animate all gems into place
     this.placeAll();

@@ -10,6 +10,7 @@ import {
 } from './constants';
 import { Board } from './Board';
 import { Gem } from './Gem';
+import { SoundManager } from './SoundManager';
 
 export class Game {
   private board: Board;
@@ -25,10 +26,12 @@ export class Game {
   private chosenJ: number = -1;
   private chosenK: number = -1;
   private countdownInterval: number | null = null;
+  private soundManager: SoundManager;
 
   constructor() {
     this.field = document.getElementById(ELEMENT_IDS.FIELD) as HTMLElement;
     this.scoreboard = document.getElementById(ELEMENT_IDS.SCOREBOARD) as HTMLElement;
+    this.soundManager = SoundManager.getInstance();
 
     // Initialize the board with default settings
     this.board = new Board(
@@ -63,6 +66,7 @@ export class Game {
         this.chosenK = k;
         console.log(`Selected gem: ${j}x${k}, color: ${this.board.getGem(j, k).color}, state: ${this.board.getGem(j, k).state}`);
         this.board.getGem(j, k).elem.classList.add(CSS_CLASSES.CHOSEN);
+        this.soundManager.play(SoundManager.SOUND_EFFECTS.TURN);
       } else {
         // Second gem selection (attempting to swap)
         this.chosen = false;
@@ -76,6 +80,7 @@ export class Game {
           this.board.swap(this.chosenJ, this.chosenK, j, k);
           this.board.getGem(this.chosenJ, this.chosenK).place();
           this.board.getGem(j, k).place();
+          this.soundManager.play(SoundManager.SOUND_EFFECTS.SWAP);
           
           // Check for matches
           this.cluster = this.board.matchChain(this.chosenJ, this.chosenK);
@@ -188,6 +193,7 @@ export class Game {
     }
     this.pause = true;
     this.field.innerHTML = 'GAME OVER';
+    this.soundManager.play(SoundManager.SOUND_EFFECTS.FAIL);
     
     // Add restart button
     const restartButton = document.createElement('div');
@@ -210,6 +216,7 @@ export class Game {
     this.pause = true;
     this.level++;
     this.field.innerHTML = 'LEVEL COMPLETE';
+    this.soundManager.play(SoundManager.SOUND_EFFECTS.YES);
     
     // Add next level button
     const nextLevelButton = document.createElement('div');
@@ -240,6 +247,13 @@ export class Game {
   private updateScoreForMatches(cluster: GemPosition[]): void {
     this.score += cluster.length * DEFAULT_SETTINGS.SCORE_MULTIPLIER;
     this.updateScoreboard();
+    
+    // Play explosion sound based on cluster size
+    if (cluster.length >= 5) {
+      this.soundManager.play(SoundManager.SOUND_EFFECTS.EXPLOSION_BIG);
+    } else {
+      this.soundManager.play(SoundManager.SOUND_EFFECTS.EXPLOSION);
+    }
   }
   
   /**
