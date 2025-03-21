@@ -24,30 +24,6 @@ export enum GemState {
   DEAD = 'dead'
 }
 
-// Game Modes
-export enum GameMode {
-  CLUSTER = 'cluster',
-  LINES = 'lines'
-}
-
-// Image Paths
-export const IMAGES = {
-  DIAGONAL: 'img/diagonal.png',
-  NO_DIAGONAL: 'img/no-diagonal.png',
-  CLUSTER: 'img/cluster.png',
-  NO_CLUSTER: 'img/no-cluster.png',
-  STARS: 'img/stars.png',
-  GRASS: 'img/grass.png'
-};
-
-// Level Info HTML
-export const LEVEL_INFO = {
-  DIAGONAL: `<img src="${IMAGES.DIAGONAL}">`,
-  NO_DIAGONAL: `<img src="${IMAGES.NO_DIAGONAL}">`,
-  CLUSTER: `<img src="${IMAGES.CLUSTER}">`,
-  NO_CLUSTER: `<img src="${IMAGES.NO_CLUSTER}">`
-};
-
 // Data Attributes
 export const DATA_ATTRIBUTES = {
   J: 'data-j',
