@@ -151,8 +151,13 @@ export class Board {
     for (let j = 0; j < this._size; j++) {
       for (let k = 0; k < this._size; k++) {
         if (this._gems[j][k].state === GemState.DEAD) {
-          // Remove the old dead gem element from the DOM
-          this._gems[j][k].elem.remove();
+          // Remove the old dead gem element after animation completes
+          const deadGem = this._gems[j][k].elem;
+          setTimeout(() => {
+            if (deadGem.parentNode) {
+              deadGem.remove();
+            }
+          }, DEFAULT_SETTINGS.KILL_DELAY);
           
           // Create a completely new gem element
           this.createBrandNewGem(j, k);

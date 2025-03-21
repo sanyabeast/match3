@@ -42,7 +42,7 @@ export const DEFAULT_SETTINGS = {
   FIELD_SIZE: 500, // pixels
   ANIMATION_DELAY: 200, // milliseconds
   SWAP_DELAY: 200, // milliseconds
-  KILL_DELAY: 150, // milliseconds
+  KILL_DELAY: 450, // milliseconds - adjusted to match faster animation
   LEVEL_START_DELAY: 500, // milliseconds
   COUNTDOWN_INTERVAL: 1000, // milliseconds
   SCORE_MULTIPLIER: 36

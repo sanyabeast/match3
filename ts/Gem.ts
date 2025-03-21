@@ -64,19 +64,27 @@ export class Gem {
 
   /**
    * Kills the gem (marks it as dead and animates it off the board)
-   * The DOM element will be removed by the Board class after animation
    */
   kill(): void {
+    // Mark the gem as dead
     this._state = GemState.DEAD;
+    
+    // Add the dead class to apply CSS styles
     this._elem.classList.add(CSS_CLASSES.DEAD);
     
-    // Create a more dramatic exit animation
-    // Random direction and scale down
-    const randomX = Math.random() * 100 - 50; // -50 to 50px
-    const randomY = Math.random() * 50 + 100; // 100 to 150px down
+    // Make sure transitions are reset
+    this._elem.style.transition = 'none';
+    this._elem.style.transform = 'none';
+    this._elem.style.opacity = '1';
     
-    // Use transform for better performance
-    this._elem.style.transform = `translate(${randomX}px, ${randomY}px) scale(0.1) rotate(${Math.random() * 360}deg)`;
+    // Force a reflow to ensure the reset is applied
+    void this._elem.offsetWidth;
+    
+    // Set up the animation - make it faster (0.4s instead of 0.6s)
+    this._elem.style.transition = 'transform 0.4s ease-in, opacity 0.4s ease-in';
+    
+    // Direct falling down animation
+    this._elem.style.transform = 'translateY(100%) scale(0.8)';
     this._elem.style.opacity = '0';
   }
 
