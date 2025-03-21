@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { Gem, GemPosition, LevelInfo, GameMode } from './types';
 
 export class Game {
@@ -9,13 +8,13 @@ export class Game {
   private colors: number = 6;
   private chosen: boolean = false;
   private diagonal: boolean = true;
-  private field: JQuery<HTMLElement>;
+  private field: HTMLElement;
   private pause: boolean = true;
   private linesOnly: boolean = false;
   private score: number = 0;
   private target: number = 0;
   private time: number = 60;
-  private scoreboard: JQuery<HTMLElement>;
+  private scoreboard: HTMLElement;
   private level: number = 1;
   private levelInfo: LevelInfo;
   private chosenJ: number = -1;
@@ -23,8 +22,8 @@ export class Game {
   private countdownInterval: number | null = null;
 
   constructor() {
-    this.field = $('#field');
-    this.scoreboard = $('#scoreboard');
+    this.field = document.getElementById('field') as HTMLElement;
+    this.scoreboard = document.getElementById('scoreboard') as HTMLElement;
     this.levelInfo = {
       diagonal: '<img src="img/diagonal.png">',
       nodiagonal: '<img src="img/no-diagonal.png">',
@@ -37,22 +36,24 @@ export class Game {
   }
 
   private initEventListeners(): void {
-    this.field.on("click", ".gem", (event: JQuery.ClickEvent) => {
-      const target = $(event.currentTarget);
+    this.field.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      if (!target.classList.contains('gem')) return;
       
       if (!this.chosen && !this.pause) {
         this.chosen = true;
-        this.chosenJ = target.data('j');
-        this.chosenK = target.data('k');
+        this.chosenJ = parseInt(target.getAttribute('data-j') || '0', 10);
+        this.chosenK = parseInt(target.getAttribute('data-k') || '0', 10);
         console.log(`${this.chosenJ}x${this.chosenK}, ${this.gems[this.chosenJ][this.chosenK].color}, ${this.gems[this.chosenJ][this.chosenK].state}`);
-        this.gems[this.chosenJ][this.chosenK].elem.addClass('chosen');
+        this.gems[this.chosenJ][this.chosenK].elem.classList.add('chosen');
       } else if (!this.pause) {
         this.chosen = false;
-        const dj = target.data('j');
-        const dk = target.data('k');
+        const dj = parseInt(target.getAttribute('data-j') || '0', 10);
+        const dk = parseInt(target.getAttribute('data-k') || '0', 10);
         
         if (this.isCorrectTurn(this.chosenJ, this.chosenK, dj, dk)) {
-          this.gems[this.chosenJ][this.chosenK].elem.removeClass('chosen');
+          this.gems[this.chosenJ][this.chosenK].elem.classList.remove('chosen');
           this.swap(this.chosenJ, this.chosenK, dj, dk);
           this.gems[this.chosenJ][this.chosenK].place();
           this.gems[dj][dk].place();
@@ -70,7 +71,7 @@ export class Game {
             this.kill(this.cluster);
           }
         } else {
-          this.gems[this.chosenJ][this.chosenK].elem.removeClass('chosen');
+          this.gems[this.chosenJ][this.chosenK].elem.classList.remove('chosen');
         }
       }
     });
@@ -94,18 +95,18 @@ export class Game {
       this.diagonal = r === 1;
     }
     
-    this.field.html(`Level ${level}`);
+    this.field.innerHTML = `Level ${level}`;
     
     if (this.linesOnly) {
-      this.field.append(this.levelInfo.nocluster);
+      this.field.innerHTML += this.levelInfo.nocluster;
     } else {
-      this.field.append(this.levelInfo.cluster);
+      this.field.innerHTML += this.levelInfo.cluster;
     }
     
     if (this.diagonal) {
-      this.field.append(this.levelInfo.diagonal);
+      this.field.innerHTML += this.levelInfo.diagonal;
     } else {
-      this.field.append(this.levelInfo.nodiagonal);
+      this.field.innerHTML += this.levelInfo.nodiagonal;
     }
     
     this.time = 60 + Math.floor((level * 5) / 2);
@@ -122,21 +123,21 @@ export class Game {
         if (this.countdownInterval) {
           clearInterval(this.countdownInterval);
         }
-        this.field.html('Game over');
-        this.scoreboard.html(`${this.score}/${this.target} | <span> 0 </span>`);
+        this.field.innerHTML = 'Game over';
+        this.scoreboard.innerHTML = `${this.score}/${this.target} | <span> 0 </span>`;
       } else if (this.time === 0 && this.score >= this.target) {
         this.level++;
         this.score = 0;
         this.startLevel(this.level);
       } else {
         this.time -= 1;
-        this.scoreboard.html(`${this.score}/${this.target} | ${this.time}`);
+        this.scoreboard.innerHTML = `${this.score}/${this.target} | ${this.time}`;
       }
     }, 1000);
   }
 
   private init(size: number, minLine: number, colors: number): void {
-    this.field.html('');
+    this.field.innerHTML = '';
     this.chosen = false;
     this.createMap(size, colors);
     this.fillMap();
@@ -156,39 +157,43 @@ export class Game {
       // Create gem elements
       for (let j = 0; j < size; j++) {
         for (let k = 0; k < size; k++) {
+          const gemElement = document.createElement('div');
+          gemElement.className = 'gem';
+          gemElement.setAttribute('data-j', j.toString());
+          gemElement.setAttribute('data-k', k.toString());
+          gemElement.setAttribute('data-color', '');
+          
+          this.field.appendChild(gemElement);
+          
           this.gems[j][k] = {
-            elem: $(),
+            elem: gemElement,
             state: 'dead',
             color: 0,
             kill: function(this: Gem): void {
               this.state = 'dead';
-              this.elem.addClass('dead');
-              this.elem.css({
-                'left': Math.random() * 500 + 'px',
-                'top': '250px'
-              });
+              this.elem.classList.add('dead');
+              this.elem.style.left = Math.random() * 500 + 'px';
+              this.elem.style.top = '250px';
             },
             place: function(this: Gem): void {
-              this.elem.css({
-                'top': this.elem.data('j') * 500 / size,
-                'left': this.elem.data('k') * 500 / size,
-              });
+              const j = parseInt(this.elem.getAttribute('data-j') || '0', 10);
+              const k = parseInt(this.elem.getAttribute('data-k') || '0', 10);
+              this.elem.style.top = j * 500 / size + 'px';
+              this.elem.style.left = k * 500 / size + 'px';
             }
           };
-
-          this.field.append(`<div class="gem" data-j="${j}" data-k="${k}" data-color=""></div>`);
-          this.gems[j][k].elem = $(`[data-j=${j}][data-k=${k}]`);
         }
       }
 
-      const gemClass = $('.gem');
-      gemClass.css({
-        'width': 500 / size - 1 + 'px',
-        'height': 500 / size - 1 + 'px',
-        'font-size': 500 / (size * 2) + 'px'
+      const gemElements = document.querySelectorAll('.gem');
+      gemElements.forEach(gemElem => {
+        const gem = gemElem as HTMLElement;
+        gem.style.width = 500 / size - 1 + 'px';
+        gem.style.height = 500 / size - 1 + 'px';
+        gem.style.fontSize = 500 / (size * 2) + 'px';
       });
     } else {
-      this.field.html(`A field with the following parameters: size: ${size}, colors: ${colors}, min. line length: ${this.minLine}, cannot be generated.`);
+      this.field.innerHTML = `A field with the following parameters: size: ${size}, colors: ${colors}, min. line length: ${this.minLine}, cannot be generated.`;
     }
   }
 
@@ -199,7 +204,7 @@ export class Game {
       for (let k = 0; k < this.size; k++) {
         if (this.gems[j][k].state === 'dead') {
           this.gems[j][k].state = 'alive';
-          this.gems[j][k].elem.removeClass('dead');
+          this.gems[j][k].elem.classList.remove('dead');
           
           let randColor: number;
           do {
@@ -208,14 +213,12 @@ export class Game {
             this.cluster = this.matchChain(j, k, 'check');
           } while (this.cluster.length !== 0);
           
-          this.gems[j][k].elem.data('color', this.gems[j][k].color).attr('data-color', String(this.gems[j][k].color));
-          this.gems[j][k].elem.css({
-            'left': k * 500 / this.size + 'px',
-            'top': -1 * ((this.size - j) * 500 / this.size) - 50 + 'px',
-          });
+          this.gems[j][k].elem.setAttribute('data-color', String(this.gems[j][k].color));
+          this.gems[j][k].elem.style.left = k * 500 / this.size + 'px';
+          this.gems[j][k].elem.style.top = -1 * ((this.size - j) * 500 / this.size) - 50 + 'px';
           
           const symbols = ['⚜', '☣', '♗', '♆', '♞', '♙', '☄', '❦', '♨', '♟'];
-          this.gems[j][k].elem.html(symbols[randColor]);
+          this.gems[j][k].elem.innerHTML = symbols[randColor];
         }
       }
     }
@@ -284,21 +287,11 @@ export class Game {
     this.gems[j][k] = this.gems[dj][dk];
     this.gems[dj][dk] = buffer;
     
-    this.gems[dj][dk].elem.data({
-      'j': dj,
-      'k': dk
-    }).attr({
-      'data-j': dj,
-      'data-k': dk
-    });
+    this.gems[dj][dk].elem.setAttribute('data-j', dj.toString());
+    this.gems[dj][dk].elem.setAttribute('data-k', dk.toString());
     
-    this.gems[j][k].elem.data({
-      'j': j,
-      'k': k
-    }).attr({
-      'data-j': j,
-      'data-k': k
-    });
+    this.gems[j][k].elem.setAttribute('data-j', j.toString());
+    this.gems[j][k].elem.setAttribute('data-k', k.toString());
   }
 
   private isCorrectTurn(j: number, k: number, dj: number, dk: number): boolean {

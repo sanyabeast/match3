@@ -1,12 +1,10 @@
-import $ from 'jquery';
-
 export interface GemPosition {
   j: number;
   k: number;
 }
 
 export interface Gem {
-  elem: JQuery<HTMLElement>;
+  elem: HTMLElement;
   state: 'alive' | 'dead';
   color: number;
   kill: () => void;
