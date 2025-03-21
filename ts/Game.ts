@@ -1,11 +1,21 @@
 import { Gem, GemPosition, LevelInfo, GameMode } from './types';
+import { 
+  ELEMENT_IDS, 
+  CSS_CLASSES, 
+  GemState, 
+  LEVEL_INFO, 
+  DATA_ATTRIBUTES, 
+  DEFAULT_SETTINGS,
+  GEM_SYMBOLS,
+  MatchAction
+} from './constants';
 
 export class Game {
   private gems: Gem[][] = [];
   private cluster: GemPosition[] = [];
-  private size: number = 18;
-  private minLine: number = 3;
-  private colors: number = 6;
+  private size: number = DEFAULT_SETTINGS.INITIAL_SIZE;
+  private minLine: number = DEFAULT_SETTINGS.MIN_LINE;
+  private colors: number = DEFAULT_SETTINGS.INITIAL_COLORS;
   private chosen: boolean = false;
   private diagonal: boolean = true;
   private field: HTMLElement;
@@ -13,7 +23,7 @@ export class Game {
   private linesOnly: boolean = false;
   private score: number = 0;
   private target: number = 0;
-  private time: number = 60;
+  private time: number = DEFAULT_SETTINGS.INITIAL_TIME;
   private scoreboard: HTMLElement;
   private level: number = 1;
   private levelInfo: LevelInfo;
@@ -22,13 +32,13 @@ export class Game {
   private countdownInterval: number | null = null;
 
   constructor() {
-    this.field = document.getElementById('field') as HTMLElement;
-    this.scoreboard = document.getElementById('scoreboard') as HTMLElement;
+    this.field = document.getElementById(ELEMENT_IDS.FIELD) as HTMLElement;
+    this.scoreboard = document.getElementById(ELEMENT_IDS.SCOREBOARD) as HTMLElement;
     this.levelInfo = {
-      diagonal: '<img src="img/diagonal.png">',
-      nodiagonal: '<img src="img/no-diagonal.png">',
-      cluster: '<img src="img/cluster.png">',
-      nocluster: '<img src="img/no-cluster.png">'
+      diagonal: LEVEL_INFO.DIAGONAL,
+      nodiagonal: LEVEL_INFO.NO_DIAGONAL,
+      cluster: LEVEL_INFO.CLUSTER,
+      nocluster: LEVEL_INFO.NO_CLUSTER
     };
 
     this.initEventListeners();
@@ -39,21 +49,21 @@ export class Game {
     this.field.addEventListener('click', (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       
-      if (!target.classList.contains('gem')) return;
+      if (!target.classList.contains(CSS_CLASSES.GEM)) return;
       
       if (!this.chosen && !this.pause) {
         this.chosen = true;
-        this.chosenJ = parseInt(target.getAttribute('data-j') || '0', 10);
-        this.chosenK = parseInt(target.getAttribute('data-k') || '0', 10);
+        this.chosenJ = parseInt(target.getAttribute(DATA_ATTRIBUTES.J) || '0', 10);
+        this.chosenK = parseInt(target.getAttribute(DATA_ATTRIBUTES.K) || '0', 10);
         console.log(`${this.chosenJ}x${this.chosenK}, ${this.gems[this.chosenJ][this.chosenK].color}, ${this.gems[this.chosenJ][this.chosenK].state}`);
-        this.gems[this.chosenJ][this.chosenK].elem.classList.add('chosen');
+        this.gems[this.chosenJ][this.chosenK].elem.classList.add(CSS_CLASSES.CHOSEN);
       } else if (!this.pause) {
         this.chosen = false;
-        const dj = parseInt(target.getAttribute('data-j') || '0', 10);
-        const dk = parseInt(target.getAttribute('data-k') || '0', 10);
+        const dj = parseInt(target.getAttribute(DATA_ATTRIBUTES.J) || '0', 10);
+        const dk = parseInt(target.getAttribute(DATA_ATTRIBUTES.K) || '0', 10);
         
         if (this.isCorrectTurn(this.chosenJ, this.chosenK, dj, dk)) {
-          this.gems[this.chosenJ][this.chosenK].elem.classList.remove('chosen');
+          this.gems[this.chosenJ][this.chosenK].elem.classList.remove(CSS_CLASSES.CHOSEN);
           this.swap(this.chosenJ, this.chosenK, dj, dk);
           this.gems[this.chosenJ][this.chosenK].place();
           this.gems[dj][dk].place();
@@ -66,12 +76,12 @@ export class Game {
               this.swap(dj, dk, this.chosenJ, this.chosenK);
               this.gems[this.chosenJ][this.chosenK].place();
               this.gems[dj][dk].place();
-            }, 500);
+            }, DEFAULT_SETTINGS.SWAP_DELAY);
           } else {
             this.kill(this.cluster);
           }
         } else {
-          this.gems[this.chosenJ][this.chosenK].elem.classList.remove('chosen');
+          this.gems[this.chosenJ][this.chosenK].elem.classList.remove(CSS_CLASSES.CHOSEN);
         }
       }
     });
@@ -109,9 +119,9 @@ export class Game {
       this.field.innerHTML += this.levelInfo.nodiagonal;
     }
     
-    this.time = 60 + Math.floor((level * 5) / 2);
+    this.time = DEFAULT_SETTINGS.INITIAL_TIME + Math.floor((level * 5) / 2);
     
-    setTimeout(() => this.init(this.size, this.minLine, this.colors), 1000);
+    setTimeout(() => this.init(this.size, this.minLine, this.colors), DEFAULT_SETTINGS.LEVEL_START_DELAY);
     
     // Start countdown
     if (this.countdownInterval) {
@@ -133,7 +143,7 @@ export class Game {
         this.time -= 1;
         this.scoreboard.innerHTML = `${this.score}/${this.target} | ${this.time}`;
       }
-    }, 1000);
+    }, DEFAULT_SETTINGS.COUNTDOWN_INTERVAL);
   }
 
   private init(size: number, minLine: number, colors: number): void {
@@ -158,39 +168,39 @@ export class Game {
       for (let j = 0; j < size; j++) {
         for (let k = 0; k < size; k++) {
           const gemElement = document.createElement('div');
-          gemElement.className = 'gem';
-          gemElement.setAttribute('data-j', j.toString());
-          gemElement.setAttribute('data-k', k.toString());
-          gemElement.setAttribute('data-color', '');
+          gemElement.className = CSS_CLASSES.GEM;
+          gemElement.setAttribute(DATA_ATTRIBUTES.J, j.toString());
+          gemElement.setAttribute(DATA_ATTRIBUTES.K, k.toString());
+          gemElement.setAttribute(DATA_ATTRIBUTES.COLOR, '');
           
           this.field.appendChild(gemElement);
           
           this.gems[j][k] = {
             elem: gemElement,
-            state: 'dead',
+            state: GemState.DEAD,
             color: 0,
             kill: function(this: Gem): void {
-              this.state = 'dead';
-              this.elem.classList.add('dead');
-              this.elem.style.left = Math.random() * 500 + 'px';
+              this.state = GemState.DEAD;
+              this.elem.classList.add(CSS_CLASSES.DEAD);
+              this.elem.style.left = Math.random() * DEFAULT_SETTINGS.FIELD_SIZE + 'px';
               this.elem.style.top = '250px';
             },
             place: function(this: Gem): void {
-              const j = parseInt(this.elem.getAttribute('data-j') || '0', 10);
-              const k = parseInt(this.elem.getAttribute('data-k') || '0', 10);
-              this.elem.style.top = j * 500 / size + 'px';
-              this.elem.style.left = k * 500 / size + 'px';
+              const j = parseInt(this.elem.getAttribute(DATA_ATTRIBUTES.J) || '0', 10);
+              const k = parseInt(this.elem.getAttribute(DATA_ATTRIBUTES.K) || '0', 10);
+              this.elem.style.top = j * DEFAULT_SETTINGS.FIELD_SIZE / size + 'px';
+              this.elem.style.left = k * DEFAULT_SETTINGS.FIELD_SIZE / size + 'px';
             }
           };
         }
       }
 
-      const gemElements = document.querySelectorAll('.gem');
+      const gemElements = document.querySelectorAll(`.${CSS_CLASSES.GEM}`);
       gemElements.forEach(gemElem => {
         const gem = gemElem as HTMLElement;
-        gem.style.width = 500 / size - 1 + 'px';
-        gem.style.height = 500 / size - 1 + 'px';
-        gem.style.fontSize = 500 / (size * 2) + 'px';
+        gem.style.width = DEFAULT_SETTINGS.FIELD_SIZE / size - 1 + 'px';
+        gem.style.height = DEFAULT_SETTINGS.FIELD_SIZE / size - 1 + 'px';
+        gem.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (size * 2) + 'px';
       });
     } else {
       this.field.innerHTML = `A field with the following parameters: size: ${size}, colors: ${colors}, min. line length: ${this.minLine}, cannot be generated.`;
@@ -202,28 +212,27 @@ export class Game {
     
     for (let j = 0; j < this.size; j++) {
       for (let k = 0; k < this.size; k++) {
-        if (this.gems[j][k].state === 'dead') {
-          this.gems[j][k].state = 'alive';
-          this.gems[j][k].elem.classList.remove('dead');
+        if (this.gems[j][k].state === GemState.DEAD) {
+          this.gems[j][k].state = GemState.ALIVE;
+          this.gems[j][k].elem.classList.remove(CSS_CLASSES.DEAD);
           
           let randColor: number;
           do {
             randColor = Math.floor(Math.random() * this.colors);
             this.gems[j][k].color = randColor;
-            this.cluster = this.matchChain(j, k, 'check');
+            this.cluster = this.matchChain(j, k, MatchAction.CHECK);
           } while (this.cluster.length !== 0);
           
-          this.gems[j][k].elem.setAttribute('data-color', String(this.gems[j][k].color));
-          this.gems[j][k].elem.style.left = k * 500 / this.size + 'px';
-          this.gems[j][k].elem.style.top = -1 * ((this.size - j) * 500 / this.size) - 50 + 'px';
+          this.gems[j][k].elem.setAttribute(DATA_ATTRIBUTES.COLOR, String(this.gems[j][k].color));
+          this.gems[j][k].elem.style.left = k * DEFAULT_SETTINGS.FIELD_SIZE / this.size + 'px';
+          this.gems[j][k].elem.style.top = -1 * ((this.size - j) * DEFAULT_SETTINGS.FIELD_SIZE / this.size) - 50 + 'px';
           
-          const symbols = ['⚜', '☣', '♗', '♆', '♞', '♙', '☄', '❦', '♨', '♟'];
-          this.gems[j][k].elem.innerHTML = symbols[randColor];
+          this.gems[j][k].elem.innerHTML = GEM_SYMBOLS[randColor];
         }
       }
     }
     
-    setTimeout(() => this.placeAll(), 600);
+    setTimeout(() => this.placeAll(), DEFAULT_SETTINGS.ANIMATION_DELAY);
     this.pause = false;
   }
 
@@ -240,7 +249,7 @@ export class Game {
     this.cluster = [];
     
     if (fnCluster.length !== 0) {
-      this.score += (fnCluster.length) * (fnCluster.length) * 36;
+      this.score += (fnCluster.length) * (fnCluster.length) * DEFAULT_SETTINGS.SCORE_MULTIPLIER;
       console.log(this.score);
       this.pause = true;
       
@@ -248,13 +257,13 @@ export class Game {
         for (let i = 0; i < fnCluster.length; i++) {
           this.gems[fnCluster[i].j][fnCluster[i].k].kill();
         }
-      }, 300);
+      }, DEFAULT_SETTINGS.KILL_DELAY);
       
       setTimeout(() => {
         for (let i = 0; i < fnCluster.length; i++) {
           this.shiftDown(fnCluster[i].j, fnCluster[i].k);
         }
-      }, 600);
+      }, DEFAULT_SETTINGS.ANIMATION_DELAY);
       
       setTimeout(() => {
         for (let j = 0; j < this.size; j++) {
@@ -263,9 +272,9 @@ export class Game {
           }
         }
         this.kill(this.cluster);
-      }, 600);
+      }, DEFAULT_SETTINGS.ANIMATION_DELAY);
     } else {
-      setTimeout(() => this.fillMap(), 600);
+      setTimeout(() => this.fillMap(), DEFAULT_SETTINGS.ANIMATION_DELAY);
       this.pause = false;
     }
   }
@@ -273,7 +282,7 @@ export class Game {
   private shiftDown(j: number, k: number): void {
     for (let m = 0; m <= j; m++) {
       for (let l = j; l > 0; l--) {
-        if (this.gems[l][k].state === 'dead') {
+        if (this.gems[l][k].state === GemState.DEAD) {
           this.swap(l, k, l - 1, k);
           this.gems[l - 1][k].place();
           this.gems[l][k].place();
@@ -287,11 +296,11 @@ export class Game {
     this.gems[j][k] = this.gems[dj][dk];
     this.gems[dj][dk] = buffer;
     
-    this.gems[dj][dk].elem.setAttribute('data-j', dj.toString());
-    this.gems[dj][dk].elem.setAttribute('data-k', dk.toString());
+    this.gems[dj][dk].elem.setAttribute(DATA_ATTRIBUTES.J, dj.toString());
+    this.gems[dj][dk].elem.setAttribute(DATA_ATTRIBUTES.K, dk.toString());
     
-    this.gems[j][k].elem.setAttribute('data-j', j.toString());
-    this.gems[j][k].elem.setAttribute('data-k', k.toString());
+    this.gems[j][k].elem.setAttribute(DATA_ATTRIBUTES.J, j.toString());
+    this.gems[j][k].elem.setAttribute(DATA_ATTRIBUTES.K, k.toString());
   }
 
   private isCorrectTurn(j: number, k: number, dj: number, dk: number): boolean {
@@ -347,8 +356,8 @@ export class Game {
     const horiz: GemPosition[] = [];
     const vrtcl: GemPosition[] = [];
     
-    if (this.gems[j][k].state !== 'dead') {
-      this.gems[j][k].state = 'dead';
+    if (this.gems[j][k].state !== GemState.DEAD) {
+      this.gems[j][k].state = GemState.DEAD;
       
       if (!this.linesOnly) {
         chain.push({
@@ -360,48 +369,48 @@ export class Game {
           // Check up
           if (chain[i].j > 0) {
             if (this.gems[chain[i].j - 1][chain[i].k].color === this.gems[chain[i].j][chain[i].k].color && 
-                this.gems[chain[i].j - 1][chain[i].k].state !== 'dead') {
+                this.gems[chain[i].j - 1][chain[i].k].state !== GemState.DEAD) {
               chain.push({
                 j: chain[i].j - 1,
                 k: chain[i].k
               });
-              this.gems[chain[i].j - 1][chain[i].k].state = 'dead';
+              this.gems[chain[i].j - 1][chain[i].k].state = GemState.DEAD;
             }
           }
           
           // Check left
           if (chain[i].k > 0) {
             if (this.gems[chain[i].j][chain[i].k - 1].color === this.gems[chain[i].j][chain[i].k].color && 
-                this.gems[chain[i].j][chain[i].k - 1].state !== 'dead') {
+                this.gems[chain[i].j][chain[i].k - 1].state !== GemState.DEAD) {
               chain.push({
                 j: chain[i].j,
                 k: chain[i].k - 1
               });
-              this.gems[chain[i].j][chain[i].k - 1].state = 'dead';
+              this.gems[chain[i].j][chain[i].k - 1].state = GemState.DEAD;
             }
           }
           
           // Check down
           if (chain[i].j < this.size - 1) {
             if (this.gems[chain[i].j + 1][chain[i].k].color === this.gems[chain[i].j][chain[i].k].color && 
-                this.gems[chain[i].j + 1][chain[i].k].state !== 'dead') {
+                this.gems[chain[i].j + 1][chain[i].k].state !== GemState.DEAD) {
               chain.push({
                 j: chain[i].j + 1,
                 k: chain[i].k
               });
-              this.gems[chain[i].j + 1][chain[i].k].state = 'dead';
+              this.gems[chain[i].j + 1][chain[i].k].state = GemState.DEAD;
             }
           }
           
           // Check right
           if (chain[i].k < this.size - 1) {
             if (this.gems[chain[i].j][chain[i].k + 1].color === this.gems[chain[i].j][chain[i].k].color && 
-                this.gems[chain[i].j][chain[i].k + 1].state !== 'dead') {
+                this.gems[chain[i].j][chain[i].k + 1].state !== GemState.DEAD) {
               chain.push({
                 j: chain[i].j,
                 k: chain[i].k + 1
               });
-              this.gems[chain[i].j][chain[i].k + 1].state = 'dead';
+              this.gems[chain[i].j][chain[i].k + 1].state = GemState.DEAD;
             }
           }
         }
@@ -422,24 +431,24 @@ export class Game {
           // Check left
           if (horiz[i].k > 0) {
             if (this.gems[horiz[i].j][horiz[i].k - 1].color === this.gems[horiz[i].j][horiz[i].k].color && 
-                this.gems[horiz[i].j][horiz[i].k - 1].state !== 'dead') {
+                this.gems[horiz[i].j][horiz[i].k - 1].state !== GemState.DEAD) {
               horiz.push({
                 j: horiz[i].j,
                 k: horiz[i].k - 1
               });
-              this.gems[horiz[i].j][horiz[i].k - 1].state = 'dead';
+              this.gems[horiz[i].j][horiz[i].k - 1].state = GemState.DEAD;
             }
           }
           
           // Check right
           if (horiz[i].k < this.size - 1) {
             if (this.gems[horiz[i].j][horiz[i].k + 1].color === this.gems[horiz[i].j][horiz[i].k].color && 
-                this.gems[horiz[i].j][horiz[i].k + 1].state !== 'dead') {
+                this.gems[horiz[i].j][horiz[i].k + 1].state !== GemState.DEAD) {
               horiz.push({
                 j: horiz[i].j,
                 k: horiz[i].k + 1
               });
-              this.gems[horiz[i].j][horiz[i].k + 1].state = 'dead';
+              this.gems[horiz[i].j][horiz[i].k + 1].state = GemState.DEAD;
             }
           }
         }
@@ -449,24 +458,24 @@ export class Game {
           // Check up
           if (vrtcl[i].j > 0) {
             if (this.gems[vrtcl[i].j - 1][vrtcl[i].k].color === this.gems[vrtcl[i].j][vrtcl[i].k].color && 
-                this.gems[vrtcl[i].j - 1][vrtcl[i].k].state !== 'dead') {
+                this.gems[vrtcl[i].j - 1][vrtcl[i].k].state !== GemState.DEAD) {
               vrtcl.push({
                 j: vrtcl[i].j - 1,
                 k: vrtcl[i].k
               });
-              this.gems[vrtcl[i].j - 1][vrtcl[i].k].state = 'dead';
+              this.gems[vrtcl[i].j - 1][vrtcl[i].k].state = GemState.DEAD;
             }
           }
           
           // Check down
           if (vrtcl[i].j < this.size - 1) {
             if (this.gems[vrtcl[i].j + 1][vrtcl[i].k].color === this.gems[vrtcl[i].j][vrtcl[i].k].color && 
-                this.gems[vrtcl[i].j + 1][vrtcl[i].k].state !== 'dead') {
+                this.gems[vrtcl[i].j + 1][vrtcl[i].k].state !== GemState.DEAD) {
               vrtcl.push({
                 j: vrtcl[i].j + 1,
                 k: vrtcl[i].k
               });
-              this.gems[vrtcl[i].j + 1][vrtcl[i].k].state = 'dead';
+              this.gems[vrtcl[i].j + 1][vrtcl[i].k].state = GemState.DEAD;
             }
           }
         }
@@ -475,21 +484,21 @@ export class Game {
       // Check if matches meet minimum line requirement
       if (chain.length < this.minLine) {
         for (let i = 0; i < chain.length; i++) {
-          this.gems[chain[i].j][chain[i].k].state = 'alive';
+          this.gems[chain[i].j][chain[i].k].state = GemState.ALIVE;
         }
         chain.length = 0;
       }
       
       if (horiz.length < this.minLine) {
         for (let i = 0; i < horiz.length; i++) {
-          this.gems[horiz[i].j][horiz[i].k].state = 'alive';
+          this.gems[horiz[i].j][horiz[i].k].state = GemState.ALIVE;
         }
         horiz.length = 0;
       }
       
       if (vrtcl.length < this.minLine) {
         for (let i = 0; i < vrtcl.length; i++) {
-          this.gems[vrtcl[i].j][vrtcl[i].k].state = 'alive';
+          this.gems[vrtcl[i].j][vrtcl[i].k].state = GemState.ALIVE;
         }
         vrtcl.length = 0;
       }
@@ -498,9 +507,9 @@ export class Game {
         chain.push(...horiz, ...vrtcl);
       }
       
-      if (action === 'check') {
+      if (action === MatchAction.CHECK) {
         for (let i = 0; i < chain.length; i++) {
-          this.gems[chain[i].j][chain[i].k].state = 'alive';
+          this.gems[chain[i].j][chain[i].k].state = GemState.ALIVE;
         }
       }
     }

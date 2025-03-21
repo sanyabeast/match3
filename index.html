@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Match3 Game</title>
-        <meta name="description" content="Match3 Game refactored to TypeScript">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Match3 Game</title>
+    <meta name="description" content="Match3 Game refactored to TypeScript">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/main.css">
+</head>
 
-        <link rel="stylesheet" href="css/main.css">
-    </head>
-    <body>
-        <div>
-            <div id="wrapper">
-            	<div id="field">
+<body>
+    <div>
+        <div id="wrapper">
+            <div id="field">
                 <div id="levelinfo"><img src="img/diagonal.png"><img src="img/cluster.png"></div>
-            	</div>            
             </div>
-            <div id="scoreboard"></div>
         </div>
-        <!-- Use the bundled JavaScript file from dist -->
-        <script src="dist/main.js"></script>
-    </body>
+        <div id="scoreboard"></div>
+    </div>
+    <!-- Use the bundled JavaScript file from dist -->
+    <script src="dist/main.js"></script>
+</body>
+
 </html>

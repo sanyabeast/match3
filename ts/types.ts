@@ -1,3 +1,5 @@
+import { GemState, GameMode as GameModeEnum } from './constants';
+
 export interface GemPosition {
   j: number;
   k: number;
@@ -5,7 +7,7 @@ export interface GemPosition {
 
 export interface Gem {
   elem: HTMLElement;
-  state: 'alive' | 'dead';
+  state: GemState;
   color: number;
   kill: () => void;
   place: () => void;
@@ -18,4 +20,4 @@ export interface LevelInfo {
   nocluster: string;
 }
 
-export type GameMode = 'cluster' | 'lines';
+export type GameMode = GameModeEnum;
