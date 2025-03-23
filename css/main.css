@@ -18,18 +18,30 @@ html {
 
 html {
     background-image: url(../img/stars.png);
+    animation: backgroundSlide 120s infinite linear;
 }
 
+#version {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+    color: #fff;
+    margin: 0;
+    font-size: 24px;
+}
 
 body {
     background-color: transparent;
     /* Old browsers */
     height: 100%;
+    width: 100%;
     background-image: url(../img/grass.png);
     background-repeat: repeat-x;
     background-position: bottom;
     font-family: ThinPixel;
     margin: 0;
+    position: relative;
+    animation: backgroundSlide 120s infinite linear;
 }
 
 body>div {
@@ -51,7 +63,6 @@ body>div {
     -moz-box-shadow: -2px 2px 0px 0px #16181D, -4px 4px 0px 0px #000;
     box-shadow: -2px 2px 0px 0px #16181D, -4px 4px 0px 0px #000;
 }
-
 
 #scoreboard {
     position: relative;
@@ -183,7 +194,7 @@ body>div {
 }
 
 .gem[data-color='0'] {
-    background-color: #b714d3;
+    background-color: #2db832;
 }
 
 .gem[data-color='1'] {
@@ -199,13 +210,12 @@ body>div {
 }
 
 .gem[data-color='4'] {
-    background-color: #2db832;
-}
-
-.gem[data-color='5'] {
     background-color: #c6c6c6;
 }
 
+.gem[data-color='5'] {
+    background-color: #b714d3;
+}
 
 .dead[data-color='0'] {
     background-color: #fff;
@@ -231,6 +241,120 @@ body>div {
     background-color: #fff;
 }
 
+/* Animation keyframes */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Background position animation keyframes */
+@keyframes backgroundSlide {
+  from { background-position-x: 0%; }
+  to { background-position-x: 100%; }
+}
+
+/* Reverse direction background slide */
+@keyframes backgroundSlideReverse {
+  from { background-position-x: 100%; }
+  to { background-position-x: 0%; }
+}
+
+/* Example usage classes */
+.sliding-background {
+  background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
+  background-size: 200% 100%;
+  animation: backgroundSlide 10s linear infinite;
+}
+
+.sliding-background-reverse {
+  background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
+  background-size: 200% 100%;
+  animation: backgroundSlideReverse 10s linear infinite;
+}
+
+/* Start screen styles */
+#start-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
+  background-size: 200% 100%;
+  animation: backgroundSlide 15s linear infinite;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 10;
+}
+
+#start-screen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+  z-index: -1;
+}
+
+#start-screen h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+#start-screen h2 {
+  font-size: 24px;
+  margin-bottom: 40px;
+  opacity: 0.9;
+  font-weight: normal;
+}
+
+.start-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 15px 30px;
+  font-size: 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  margin-top: 20px;
+  animation: bounce 1.5s infinite;
+}
+
+.start-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#restart {
+  text-decoration: none;
+  color: red;
+}
 
 @-webkit-keyframes swing {
     20% {
@@ -260,9 +384,4 @@ body>div {
         opacity: 1;
 
     }
-}
-
-#restart {
-    text-decoration: none;
-    color: red;
 }

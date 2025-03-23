@@ -33,7 +33,7 @@ export class Game {
     this.scoreboard = document.getElementById(ELEMENT_IDS.SCOREBOARD) as HTMLElement;
     this.soundManager = SoundManager.getInstance();
 
-    // Initialize the board with default settings
+    // Initialize the board with default settings - always use 10x10 grid
     this.board = new Board(
       this.field, 
       DEFAULT_SETTINGS.INITIAL_SIZE, 
@@ -300,11 +300,14 @@ export class Game {
   }
 
   public startLevel(level: number): void {
+    // Skip if board is not initialized
+    if (!this.board) return;
+    
     // Calculate target score based on level
     this.target = Math.floor(Math.sqrt(level) * 5000);
     
-    // Set board size (random between 12-16)
-    const size = Math.floor(Math.random() * 5) + 12;
+    // Always use 10x10 grid
+    const size = DEFAULT_SETTINGS.INITIAL_SIZE; // Always use 10x10 grid
     
     // Increase color variety as levels progress (max 10)
     const colors = Math.min(DEFAULT_SETTINGS.INITIAL_COLORS + level - 1, 10);
@@ -323,7 +326,7 @@ export class Game {
     
     // Initialize the game board after a delay
     setTimeout(() => {
-      // Create a new board with the new size and settings
+      // Create a new board with the fixed 10x10 size and settings
       this.board = new Board(this.field, size, DEFAULT_SETTINGS.MIN_LINE, colors);
       
       // Reset game state
