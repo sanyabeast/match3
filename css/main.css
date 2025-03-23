@@ -29,6 +29,7 @@ body {
     background-repeat: repeat-x;
     background-position: bottom;
     font-family: ThinPixel;
+    margin: 0;
 }
 
 body>div {
@@ -81,7 +82,7 @@ body>div {
     overflow: hidden;
     width: 479px;
     height: 479px;
-    background: #86685D;
+    background: #000000;
     line-height: 8em;
     font-size: 60px;
     text-align: center;
@@ -91,7 +92,7 @@ body>div {
     padding: 10px;
     border-width: 5px;
     border-style: solid;
-    border-color: #000 #171717 #B4B3B3 #898989;
+    border-color: #404040 #5e5e5e #B4B3B3 #898989;
     position: absolute;
     /* Disable text selection */
     -webkit-user-select: none;
@@ -182,45 +183,29 @@ body>div {
 }
 
 .gem[data-color='0'] {
-    background-color: #00AE5C;
-
+    background-color: #b714d3;
 }
 
 .gem[data-color='1'] {
-    background-color: #E07001;
+    background-color: #ffc107;
 }
 
 .gem[data-color='2'] {
-    background-color: #C50269;
+    background-color: #0387f4;
 }
 
 .gem[data-color='3'] {
-    background-color: #B20000;
+    background-color: #ff2717;
 }
 
 .gem[data-color='4'] {
-    background-color: #D9C61A;
+    background-color: #2db832;
 }
 
 .gem[data-color='5'] {
-    background-color: #8E1EA2;
+    background-color: #c6c6c6;
 }
 
-.gem[data-color='6'] {
-    background-color: #1C5789;
-}
-
-.gem[data-color='7'] {
-    background-color: #00A8CC;
-}
-
-.gem[data-color='8'] {
-    background-color: #D7AAA2;
-}
-
-.gem[data-color='9'] {
-    background-color: #2D1D50;
-}
 
 .dead[data-color='0'] {
     background-color: #fff;
@@ -246,21 +231,6 @@ body>div {
     background-color: #fff;
 }
 
-.dead[data-color='6'] {
-    background-color: #fff;
-}
-
-.dead[data-color='7'] {
-    background-color: #fff;
-}
-
-.dead[data-color='8'] {
-    background-color: #fff;
-}
-
-.dead[data-color='9'] {
-    background-color: #fff;
-}
 
 @-webkit-keyframes swing {
     20% {

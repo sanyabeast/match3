@@ -35,9 +35,9 @@ export const DATA_ATTRIBUTES = {
 
 // Game Settings
 export const DEFAULT_SETTINGS = {
-  INITIAL_SIZE: 18,
+  INITIAL_SIZE: 10,
   MIN_LINE: 3,
-  INITIAL_COLORS: 6,
+  INITIAL_COLORS: 5,
   INITIAL_TIME: 60,
   FIELD_SIZE: 500, // pixels
   ANIMATION_DELAY: 200, // milliseconds

@@ -51,7 +51,6 @@ package-lock.json
 yarn.lock
 
 # TypeScript
-dist/
 *.tsbuildinfo
 
 # IDE
