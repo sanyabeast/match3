@@ -42,6 +42,7 @@ export class Game {
     );
 
     this.initEventListeners();
+    this.setupAudioContext();
     this.startLevel(this.level);
   }
 
@@ -277,6 +278,27 @@ export class Game {
     });
   }
 
+  /**
+   * Sets up audio context after user interaction
+   */
+  private setupAudioContext(): void {
+    // Add a one-time event listener to enable audio after first user interaction
+    const enableAudio = () => {
+      // Notify sound manager that user interaction has occurred
+      this.soundManager.userInteractionOccurred();
+      
+      // Remove event listeners after first interaction
+      document.removeEventListener('click', enableAudio);
+      document.removeEventListener('touchstart', enableAudio);
+      document.removeEventListener('keydown', enableAudio);
+    };
+    
+    // Add event listeners for common user interactions
+    document.addEventListener('click', enableAudio);
+    document.addEventListener('touchstart', enableAudio);
+    document.addEventListener('keydown', enableAudio);
+  }
+
   public startLevel(level: number): void {
     // Calculate target score based on level
     this.target = Math.floor(Math.sqrt(level) * 5000);
@@ -295,6 +317,9 @@ export class Game {
     
     // Set time limit based on level
     this.time = DEFAULT_SETTINGS.INITIAL_TIME + Math.floor((level * 5) / 2);
+    
+    // Try to play background music (will only work after user interaction)
+    this.soundManager.playBackgroundMusic();
     
     // Initialize the game board after a delay
     setTimeout(() => {
@@ -369,6 +394,7 @@ export class Game {
     this.pause = true;
     this.field.innerHTML = 'GAME OVER';
     this.soundManager.play(SoundManager.SOUND_EFFECTS.FAIL);
+    this.soundManager.pauseBackgroundMusic();
     
     // Add restart button
     const restartButton = document.createElement('div');

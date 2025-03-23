@@ -6,6 +6,9 @@ export class SoundManager {
   private static instance: SoundManager;
   private sounds: Map<string, HTMLAudioElement> = new Map();
   private enabled: boolean = true;
+  private backgroundMusic: HTMLAudioElement | null = null;
+  private audioContext: AudioContext | null = null;
+  private hasUserInteraction: boolean = false;
 
   // Sound effect names
   public static readonly SOUND_EFFECTS = {
@@ -15,7 +18,8 @@ export class SoundManager {
     FILL: 'fill',
     SWAP: 'swap',
     TURN: 'turn',
-    YES: 'yes'
+    YES: 'yes',
+    BG_THEME: 'bg_theme'
   };
 
   /**
@@ -23,6 +27,7 @@ export class SoundManager {
    */
   private constructor() {
     this.loadSounds();
+    this.initBackgroundMusic();
   }
 
   /**
@@ -46,6 +51,22 @@ export class SoundManager {
     this.loadSound(SoundManager.SOUND_EFFECTS.SWAP, 'swap.mp3');
     this.loadSound(SoundManager.SOUND_EFFECTS.TURN, 'turn.mp3');
     this.loadSound(SoundManager.SOUND_EFFECTS.YES, 'yes.mp3');
+  }
+
+  /**
+   * Initialize background music
+   */
+  private initBackgroundMusic(): void {
+    this.backgroundMusic = new Audio('audio/bg_theme.mp3');
+    this.backgroundMusic.loop = true;
+    this.backgroundMusic.volume = 0.3; // Lower volume for background music
+    
+    // Create audio context for better control
+    try {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    } catch (e) {
+      console.warn('Web Audio API not supported in this browser');
+    }
   }
 
   /**
@@ -75,10 +96,49 @@ export class SoundManager {
   }
 
   /**
+   * Start playing background music
+   */
+  public playBackgroundMusic(): void {
+    if (!this.enabled || !this.backgroundMusic) return;
+    
+    // Only play if not already playing
+    if (this.backgroundMusic.paused) {
+      // Resume audio context if it exists and is suspended
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        this.audioContext.resume().catch(error => {
+          console.warn('Error resuming AudioContext:', error);
+        });
+      }
+      
+      // Play the background music
+      this.backgroundMusic.play().catch(error => {
+        // If autoplay was prevented, we'll wait for user interaction
+        console.warn('Error playing background music (likely autoplay restriction):', error);
+      });
+    }
+  }
+
+  /**
+   * Pause background music
+   */
+  public pauseBackgroundMusic(): void {
+    if (this.backgroundMusic && !this.backgroundMusic.paused) {
+      this.backgroundMusic.pause();
+    }
+  }
+
+  /**
    * Enable or disable all sounds
    */
   public setEnabled(enabled: boolean): void {
     this.enabled = enabled;
+    
+    // Handle background music based on enabled state
+    if (!enabled) {
+      this.pauseBackgroundMusic();
+    } else if (this.backgroundMusic) {
+      this.playBackgroundMusic();
+    }
   }
 
   /**
@@ -86,6 +146,14 @@ export class SoundManager {
    */
   public toggleSound(): boolean {
     this.enabled = !this.enabled;
+    
+    // Handle background music based on new enabled state
+    if (!this.enabled) {
+      this.pauseBackgroundMusic();
+    } else {
+      this.playBackgroundMusic();
+    }
+    
     return this.enabled;
   }
 
@@ -94,5 +162,24 @@ export class SoundManager {
    */
   public isEnabled(): boolean {
     return this.enabled;
+  }
+
+  /**
+   * Mark that user interaction has occurred
+   */
+  public userInteractionOccurred(): void {
+    this.hasUserInteraction = true;
+    
+    // Resume audio context if it was suspended
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(error => {
+        console.warn('Error resuming AudioContext:', error);
+      });
+    }
+    
+    // Try to play background music now that we have user interaction
+    if (this.enabled) {
+      this.playBackgroundMusic();
+    }
   }
 }
