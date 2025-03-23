@@ -303,11 +303,11 @@ export class Game {
     // Skip if board is not initialized
     if (!this.board) return;
     
-    // Calculate target score based on level
-    this.target = Math.floor(Math.sqrt(level) * 5000);
+    // Calculate target score based on level using constants
+    this.target = Math.floor(DEFAULT_SETTINGS.TARGET_SCORE_FACTOR(level) * DEFAULT_SETTINGS.TARGET_SCORE_BASE);
     
     // Always use 10x10 grid
-    const size = DEFAULT_SETTINGS.INITIAL_SIZE; // Always use 10x10 grid
+    const size = DEFAULT_SETTINGS.INITIAL_SIZE;
     
     // Increase color variety as levels progress (max 10)
     const colors = Math.min(DEFAULT_SETTINGS.INITIAL_COLORS + level - 1, 10);
@@ -318,8 +318,8 @@ export class Game {
     // Display level information
     this.displayLevelInfo(level);
     
-    // Set time limit based on level
-    this.time = DEFAULT_SETTINGS.INITIAL_TIME + Math.floor((level * 5) / 2);
+    // Set time limit based on level using constants
+    this.time = DEFAULT_SETTINGS.INITIAL_TIME + Math.floor(level * DEFAULT_SETTINGS.TIME_INCREASE_PER_LEVEL);
     
     // Try to play background music (will only work after user interaction)
     this.soundManager.playBackgroundMusic();
