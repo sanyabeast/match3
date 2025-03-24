@@ -2,7 +2,7 @@
 
 A modern implementation of the classic Match-3 puzzle game, originally created in 2013 and now refactored to TypeScript.
 
-[Play the game online](https://sanyabeast.github.io/match3/)
+[Play the game online](https://sanyabeast.github.io/match3/dist/index.html)
 
 ## Features
 

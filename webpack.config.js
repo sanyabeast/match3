@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './ts/main.ts',
@@ -18,6 +19,10 @@ module.exports = {
         },
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   resolve: {
@@ -26,6 +31,7 @@ module.exports = {
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist'),
+    clean: true, // Clean the output directory before emit
   },
   devtool: 'eval-source-map', // Better source maps for development
   devServer: {
@@ -52,6 +58,15 @@ module.exports = {
       template: 'static/index.html',
       inject: 'body',
       scriptLoading: 'defer',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'css', to: 'css' },
+        { from: 'img', to: 'img' },
+        { from: 'audio', to: 'audio' },
+        { from: 'fonts', to: 'fonts' },
+        { from: 'misc', to: 'misc' },
+      ],
     }),
   ],
 };
