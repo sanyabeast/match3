@@ -100,7 +100,7 @@ export class Gem {
     this._elem.style.opacity = '1';
     
     // Position the gem
-    this._elem.style.top = j * DEFAULT_SETTINGS.FIELD_SIZE / this._boardSize + 'px';
-    this._elem.style.left = k * DEFAULT_SETTINGS.FIELD_SIZE / this._boardSize + 'px';
+    this._elem.style.top = `${j * (100/this._boardSize)}%`;
+    this._elem.style.left = `${k * (100/this._boardSize)}%`;
   }
 }

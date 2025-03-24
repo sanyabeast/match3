@@ -48,16 +48,19 @@ body>div {
     position: absolute;
     top: 50%;
     left: 50%;
-    margin: -276px 0 0 -276px;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
 }
 
 #wrapper {
     position: relative;
     display: inline-block;
-    width: 510px;
-    height: 510px;
+    width: 60vh;
+    height: 60vh;
+    box-sizing: border-box;
     background-color: #465251;
-    padding: 10px;
+    padding: 4px;
     border: 2px solid #1E2833;
     -webkit-box-shadow: -2px 2px 0px 0px #16181D, -4px 4px 0px 0px #000;
     -moz-box-shadow: -2px 2px 0px 0px #16181D, -4px 4px 0px 0px #000;
@@ -76,7 +79,7 @@ body>div {
     margin-top: 16px;
     margin-bottom: 48px;
     margin-left: 12px;
-    width: 150px;
+    width: 50%;
     color: #0D1822;
     font-size: 30px;
     background-color: #D8D8D8;
@@ -91,8 +94,9 @@ body>div {
 
 #field {
     overflow: hidden;
-    width: 479px;
-    height: 479px;
+    height: calc(100% - 8px);
+    width: calc(100% - 8px);
+    box-sizing: border-box;
     background: #000000;
     line-height: 8em;
     font-size: 60px;
@@ -122,7 +126,10 @@ body>div {
 }
 
 .gem {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40%;
     margin: 0;
     -webkit-transition: all 300ms ease;
     -moz-transition: all 300ms ease;
@@ -243,117 +250,147 @@ body>div {
 
 /* Animation keyframes */
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Background position animation keyframes */
 @keyframes backgroundSlide {
-  from { background-position-x: 0%; }
-  to { background-position-x: 100%; }
+    from {
+        background-position-x: 0%;
+    }
+
+    to {
+        background-position-x: 100%;
+    }
 }
 
 /* Reverse direction background slide */
 @keyframes backgroundSlideReverse {
-  from { background-position-x: 100%; }
-  to { background-position-x: 0%; }
+    from {
+        background-position-x: 100%;
+    }
+
+    to {
+        background-position-x: 0%;
+    }
 }
 
 /* Example usage classes */
 .sliding-background {
-  background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
-  background-size: 200% 100%;
-  animation: backgroundSlide 10s linear infinite;
+    background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
+    background-size: 200% 100%;
+    animation: backgroundSlide 10s linear infinite;
 }
 
 .sliding-background-reverse {
-  background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
-  background-size: 200% 100%;
-  animation: backgroundSlideReverse 10s linear infinite;
+    background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
+    background-size: 200% 100%;
+    animation: backgroundSlideReverse 10s linear infinite;
 }
 
 /* Start screen styles */
 #start-screen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
-  background-size: 200% 100%;
-  animation: backgroundSlide 15s linear infinite;
-  color: white;
-  text-align: center;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  position: relative;
-  overflow: hidden;
-  z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #4a148c, #7b1fa2, #4a148c);
+    background-size: 200% 100%;
+    animation: backgroundSlide 15s linear infinite;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
 }
 
 #start-screen::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
-  z-index: -1;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+    z-index: -1;
 }
 
 #start-screen h1 {
-  font-size: 48px;
-  margin-bottom: 10px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  animation: pulse 2s infinite;
+    font-size: 48px;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite;
 }
 
 #start-screen h2 {
-  font-size: 24px;
-  margin-bottom: 40px;
-  opacity: 0.9;
-  font-weight: normal;
+    font-size: 24px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+    font-weight: normal;
 }
 
 .start-button {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 15px 30px;
-  font-size: 24px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  margin-top: 20px;
-  animation: bounce 1.5s infinite;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 15px 30px;
+    font-size: 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    margin-top: 20px;
+    animation: bounce 1.5s infinite;
 }
 
 .start-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
 }
 
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 #restart {
-  text-decoration: none;
-  color: red;
+    text-decoration: none;
+    color: red;
 }
 
 @-webkit-keyframes swing {

@@ -137,9 +137,9 @@ export class Board {
     const gemElements = document.querySelectorAll(`.${CSS_CLASSES.GEM}`);
     gemElements.forEach(gemElem => {
       const gem = gemElem as HTMLElement;
-      gem.style.width = DEFAULT_SETTINGS.FIELD_SIZE / this._size - 1 + 'px';
-      gem.style.height = DEFAULT_SETTINGS.FIELD_SIZE / this._size - 1 + 'px';
-      gem.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (this._size * 2) + 'px';
+      gem.style.width = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
+      gem.style.height = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
+      // gem.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (this._size * 2) + 'px';
     });
   }
 
@@ -182,10 +182,11 @@ export class Board {
     gemElement.setAttribute(DATA_ATTRIBUTES.J, j.toString());
     gemElement.setAttribute(DATA_ATTRIBUTES.K, k.toString());
     
+
     // Set the gem size
-    gemElement.style.width = DEFAULT_SETTINGS.FIELD_SIZE / this._size - 1 + 'px';
-    gemElement.style.height = DEFAULT_SETTINGS.FIELD_SIZE / this._size - 1 + 'px';
-    gemElement.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (this._size * 2) + 'px';
+    gemElement.style.width = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
+    gemElement.style.height = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
+    // gemElement.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (this._size * 2) + 'px';
     
     // Calculate how far above the board this gem should start
     // The higher the row (smaller j), the further above the board
@@ -194,7 +195,7 @@ export class Board {
     
     // Position the gem initially above the board for animation
     gemElement.style.top = `${startingYPosition}px`;
-    gemElement.style.left = k * DEFAULT_SETTINGS.FIELD_SIZE / this._size + 'px';
+    gemElement.style.left = `${k * (100/DEFAULT_SETTINGS.INITIAL_SIZE)}%`;
     
     // Add some initial transform for a more dynamic entrance
     gemElement.style.transform = `scale(0.8) rotate(${Math.random() * 20 - 10}deg)`;
