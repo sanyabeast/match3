@@ -35,9 +35,9 @@ export const DATA_ATTRIBUTES = {
 
 // Game Settings
 export const DEFAULT_SETTINGS = {
-  INITIAL_SIZE: 12, // Changed from 12 to 10 to always have a 10x10 grid
+  INITIAL_SIZE: 12, // Fixed grid size to 10x10 for better gameplay
   MIN_LINE: 3,
-  INITIAL_COLORS: 5,
+  INITIAL_COLORS: 4,
   INITIAL_TIME: 180,
   FIELD_SIZE: 500, // pixels
   ANIMATION_DELAY: 200, // milliseconds
