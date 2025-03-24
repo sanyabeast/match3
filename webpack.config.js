@@ -49,7 +49,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'index.html',
+      template: 'static/index.html',
       inject: 'body',
       scriptLoading: 'defer',
     }),

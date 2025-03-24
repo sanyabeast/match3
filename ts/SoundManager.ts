@@ -45,12 +45,10 @@ export class SoundManager {
    */
   private loadSounds(): void {
     this.loadSound(SoundManager.SOUND_EFFECTS.EXPLOSION, 'explosion.mp3');
-    this.loadSound(SoundManager.SOUND_EFFECTS.EXPLOSION_BIG, 'Explosion8.mp3');
     this.loadSound(SoundManager.SOUND_EFFECTS.FAIL, 'fail.mp3');
     this.loadSound(SoundManager.SOUND_EFFECTS.FILL, 'fill.mp3');
     this.loadSound(SoundManager.SOUND_EFFECTS.SWAP, 'swap.mp3');
     this.loadSound(SoundManager.SOUND_EFFECTS.TURN, 'turn.mp3');
-    this.loadSound(SoundManager.SOUND_EFFECTS.YES, 'yes.mp3');
   }
 
   /**
