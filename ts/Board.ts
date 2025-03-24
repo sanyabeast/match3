@@ -186,7 +186,7 @@ export class Board {
     // Set the gem size
     gemElement.style.width = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
     gemElement.style.height = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
-    // gemElement.style.fontSize = DEFAULT_SETTINGS.FIELD_SIZE / (this._size * 2) + 'px';
+    // gemElement.style.fontSize = '10px';
     
     // Calculate how far above the board this gem should start
     // The higher the row (smaller j), the further above the board
