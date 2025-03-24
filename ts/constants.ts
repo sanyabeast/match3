@@ -40,16 +40,16 @@ export const DEFAULT_SETTINGS = {
   INITIAL_COLORS: 4,
   INITIAL_TIME: 180,
   FIELD_SIZE: 500, // pixels
-  ANIMATION_DELAY: 200, // milliseconds
-  SWAP_DELAY: 200, // milliseconds
-  KILL_DELAY: 450, // milliseconds - adjusted to match faster animation
+  ANIMATION_DELAY: 150, // milliseconds - reduced from 200ms
+  SWAP_DELAY: 150, // milliseconds - reduced from 200ms
+  KILL_DELAY: 300, // milliseconds - reduced from 450ms
   LEVEL_START_DELAY: 500, // milliseconds
   COUNTDOWN_INTERVAL: 1000, // milliseconds
   SCORE_MULTIPLIER: 36,
   // Animation settings
-  FALL_DELAY_PER_ROW: 30, // milliseconds delay per row for cascading effect
-  FALL_ANIMATION_DURATION: 400, // milliseconds for the falling animation
-  BOUNCE_DELAY: 150, // milliseconds before bounce animation completes
+  FALL_DELAY_PER_ROW: 15, // milliseconds delay per row - reduced from 30ms
+  FALL_ANIMATION_DURATION: 250, // milliseconds - reduced from 400ms
+  BOUNCE_DELAY: 100, // milliseconds - reduced from 150ms (though no longer used)
   // Target score calculation constants
   TARGET_SCORE_BASE: 10000,
   TARGET_SCORE_FACTOR: Math.sqrt, // Function to apply to level number
@@ -58,7 +58,7 @@ export const DEFAULT_SETTINGS = {
 };
 
 // Gem Symbols
-export const GEM_SYMBOLS = ['⚜', '☣', '♗', '♆', '♞', '♙', '☄', '❦', '♨', '♟'];
+export const GEM_SYMBOLS = ['⚜', '☄', '♗', '♆', '♙', '❦', '☣', '♞', '♨', '♟'];
 
 // Match Chain Actions
 export enum MatchAction {

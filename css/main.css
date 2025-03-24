@@ -156,7 +156,6 @@ body {
     position: absolute;
     cursor: pointer;
     color: rgb(0 0 0 / 76%);
-    text-shadow: -1px 1px 0px rgba(255, 255, 255, 0.46);
     line-height: 2em;
     text-indent: 0.05em;
     text-align: center;
@@ -169,7 +168,7 @@ body {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
-    text-shadow: -1px -1px 0px #ffffff91;
+    text-shadow: 1px 1px 0px black;
 }
 
 .chosen {
@@ -214,26 +213,32 @@ body {
 
 .gem[data-color='0'] {
     background-color: #2db832;
+    color: #6cff72;
 }
 
 .gem[data-color='1'] {
     background-color: #ffc107;
+    color: #ff9900;
 }
 
 .gem[data-color='2'] {
     background-color: #0387f4;
+    color: #0063cc;
 }
 
 .gem[data-color='3'] {
-    background-color: #ff2717;
+    background-color: #b90000;
+    color: #810000;
 }
 
 .gem[data-color='4'] {
     background-color: #c6c6c6;
+    color: #8c8c8c;
 }
 
 .gem[data-color='5'] {
-    background-color: #b714d3;
+    background-color: #b336ff;
+    color: #cf80ff;
 }
 
 .dead[data-color='0'] {

@@ -179,18 +179,15 @@ export class Board {
     // Create a new DOM element for the gem
     const gemElement = document.createElement('div');
     gemElement.className = CSS_CLASSES.GEM;
-    gemElement.setAttribute(DATA_ATTRIBUTES.J, j.toString());
-    gemElement.setAttribute(DATA_ATTRIBUTES.K, k.toString());
+    gemElement.setAttribute(DATA_ATTRIBUTES.J, String(j - 2)); 
+    gemElement.setAttribute(DATA_ATTRIBUTES.K, String(k));
     
-
     // Set the gem size
     gemElement.style.width = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
     gemElement.style.height = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
     
     // Calculate how far above the board this gem should start
-    // The higher the row (smaller j), the further above the board
-    const offsetMultiplier = j < 3 ? 3 - j : 1;
-    const startingYPosition = -((offsetMultiplier + 3) * DEFAULT_SETTINGS.FIELD_SIZE / this._size);
+    const startingYPosition = -(2 * DEFAULT_SETTINGS.FIELD_SIZE / this._size);
     
     // Position the gem initially above the board for animation
     gemElement.style.top = `${startingYPosition}px`;
@@ -219,6 +216,9 @@ export class Board {
     this._gems[j][k].color = color;
     gemElement.setAttribute(DATA_ATTRIBUTES.COLOR, String(color));
     gemElement.innerHTML = GEM_SYMBOLS[color];
+    
+    // Update the gem's position attributes to its final position
+    gemElement.setAttribute(DATA_ATTRIBUTES.J, String(j));
   }
 
   /**

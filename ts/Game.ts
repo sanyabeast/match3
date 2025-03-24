@@ -510,8 +510,8 @@ export class Game {
           // Swap the gems
           this.board.swap(j, k, j + 1, k);
           
-          // Add a small delay based on row position for a cascading effect
-          const delay = (this.board.size - j) * 10; // Small delay for visual effect
+          // Add a very small delay based on row position for a subtle cascading effect
+          const delay = (this.board.size - j) * 5; // Reduced from 10ms to 5ms for smoother animation
           setTimeout(() => {
             this.board.getGem(j + 1, k).place(); // Place only the moved gem for efficiency
           }, delay);
@@ -523,13 +523,12 @@ export class Game {
     
     // If any gems were shifted, continue checking with a delay
     if (shifted) {
-      setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.ANIMATION_DELAY);
+      setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.ANIMATION_DELAY / 2); // Reduced delay for faster animation
     } else {
       // No more shifts needed, fill empty spaces and check for new matches
       this.board.fillMap();
       // Wait for fill animation to complete before checking for new matches
-      // This is now handled in findAndProcessNewMatches with its own delay
-      setTimeout(() => this.findAndProcessNewMatches(), DEFAULT_SETTINGS.ANIMATION_DELAY);
+      setTimeout(() => this.findAndProcessNewMatches(), DEFAULT_SETTINGS.ANIMATION_DELAY / 2); // Reduced delay
     }
   }
   
@@ -574,6 +573,6 @@ export class Game {
         // No new matches, resume gameplay
         this.pause = false;
       }
-    }, DEFAULT_SETTINGS.FALL_ANIMATION_DURATION + 100); // Wait for falling animation to complete
+    }, DEFAULT_SETTINGS.FALL_ANIMATION_DURATION + 50); // Reduced from 100ms to 50ms for faster animation
   }
 }

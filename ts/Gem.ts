@@ -95,20 +95,15 @@ export class Gem {
     const j = parseInt(this._elem.getAttribute(DATA_ATTRIBUTES.J) || '0', 10);
     const k = parseInt(this._elem.getAttribute(DATA_ATTRIBUTES.K) || '0', 10);
     
-    // Reset transition to use a bounce effect for falling
-    this._elem.style.transition = `top ${DEFAULT_SETTINGS.FALL_ANIMATION_DURATION/1000}s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.15s ease-in, transform 0.2s ease-out, opacity 0.15s ease-out`;
+    // Use linear transition for smoother falling
+    this._elem.style.transition = `top ${DEFAULT_SETTINGS.FALL_ANIMATION_DURATION/1000}s linear, left 0.15s linear, transform 0.15s ease-out, opacity 0.15s ease-out`;
     
-    // Reset transform with a slight bounce effect
-    this._elem.style.transform = 'scale(1.05)';
+    // Simplify the transform - no bounce effect for smoother animation
+    this._elem.style.transform = 'scale(1)';
     this._elem.style.opacity = '1';
     
     // Position the gem
     this._elem.style.top = `${j * (100/this._boardSize)}%`;
     this._elem.style.left = `${k * (100/this._boardSize)}%`;
-    
-    // Add a small delay and then reset the transform to normal scale
-    setTimeout(() => {
-      this._elem.style.transform = 'scale(1)';
-    }, DEFAULT_SETTINGS.BOUNCE_DELAY);
   }
 }
