@@ -186,12 +186,11 @@ export class Board {
     // Set the gem size
     gemElement.style.width = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
     gemElement.style.height = `${100/DEFAULT_SETTINGS.INITIAL_SIZE}%`;
-    // gemElement.style.fontSize = '10px';
     
     // Calculate how far above the board this gem should start
     // The higher the row (smaller j), the further above the board
     const offsetMultiplier = j < 3 ? 3 - j : 1;
-    const startingYPosition = -((offsetMultiplier + 1) * DEFAULT_SETTINGS.FIELD_SIZE / this._size);
+    const startingYPosition = -((offsetMultiplier + 3) * DEFAULT_SETTINGS.FIELD_SIZE / this._size);
     
     // Position the gem initially above the board for animation
     gemElement.style.top = `${startingYPosition}px`;
@@ -270,9 +269,16 @@ export class Board {
    * Places all gems on the board
    */
   placeAll(): void {
-    for (let j = 0; j < this._size; j++) {
+    // Stagger the animation for a cascading effect
+    for (let j = this._size - 1; j >= 0; j--) {
       for (let k = 0; k < this._size; k++) {
-        this._gems[j][k].place();
+        // Delay the animation based on the row position
+        // Gems at the top of the board (smaller j) will fall later
+        const delay = (this._size - j) * DEFAULT_SETTINGS.FALL_DELAY_PER_ROW;
+        
+        setTimeout(() => {
+          this._gems[j][k].place();
+        }, delay);
       }
     }
   }

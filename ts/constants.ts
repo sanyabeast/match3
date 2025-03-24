@@ -46,6 +46,10 @@ export const DEFAULT_SETTINGS = {
   LEVEL_START_DELAY: 500, // milliseconds
   COUNTDOWN_INTERVAL: 1000, // milliseconds
   SCORE_MULTIPLIER: 36,
+  // Animation settings
+  FALL_DELAY_PER_ROW: 30, // milliseconds delay per row for cascading effect
+  FALL_ANIMATION_DURATION: 400, // milliseconds for the falling animation
+  BOUNCE_DELAY: 150, // milliseconds before bounce animation completes
   // Target score calculation constants
   TARGET_SCORE_BASE: 10000,
   TARGET_SCORE_FACTOR: Math.sqrt, // Function to apply to level number

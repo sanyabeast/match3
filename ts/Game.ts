@@ -509,20 +509,27 @@ export class Game {
         ) {
           // Swap the gems
           this.board.swap(j, k, j + 1, k);
-          this.board.getGem(j + 1, k).place(); // Place only the moved gem for efficiency
+          
+          // Add a small delay based on row position for a cascading effect
+          const delay = (this.board.size - j) * 10; // Small delay for visual effect
+          setTimeout(() => {
+            this.board.getGem(j + 1, k).place(); // Place only the moved gem for efficiency
+          }, delay);
+          
           shifted = true;
         }
       }
     }
     
-    // If any gems were shifted, continue checking with a shorter delay
+    // If any gems were shifted, continue checking with a delay
     if (shifted) {
-      setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.ANIMATION_DELAY / 2);
+      setTimeout(() => this.shiftDown(), DEFAULT_SETTINGS.ANIMATION_DELAY);
     } else {
       // No more shifts needed, fill empty spaces and check for new matches
       this.board.fillMap();
-      // Use a shorter delay for better responsiveness
-      setTimeout(() => this.findAndProcessNewMatches(), DEFAULT_SETTINGS.ANIMATION_DELAY / 2);
+      // Wait for fill animation to complete before checking for new matches
+      // This is now handled in findAndProcessNewMatches with its own delay
+      setTimeout(() => this.findAndProcessNewMatches(), DEFAULT_SETTINGS.ANIMATION_DELAY);
     }
   }
   
@@ -530,40 +537,43 @@ export class Game {
    * Finds and processes new matches after shifting
    */
   private findAndProcessNewMatches(): void {
-    let newCluster: GemPosition[] = [];
-    
-    // Check the entire board for matches
-    for (let j = 0; j < this.board.size; j++) {
-      for (let k = 0; k < this.board.size; k++) {
-        const gem = this.board.getGem(j, k);
-        if (gem.state === GemState.ALIVE) {
-          const matches = this.board.matchChain(j, k);
-          if (matches.length > 0) {
-            // Add unique matches to the cluster
-            for (const match of matches) {
-              // Check if this position is already in the cluster
-              const isDuplicate = newCluster.some(
-                pos => pos.j === match.j && pos.k === match.k
-              );
-              
-              if (!isDuplicate) {
-                newCluster.push(match);
+    // Add a delay to allow the falling animation to complete
+    setTimeout(() => {
+      let newCluster: GemPosition[] = [];
+      
+      // Check the entire board for matches
+      for (let j = 0; j < this.board.size; j++) {
+        for (let k = 0; k < this.board.size; k++) {
+          const gem = this.board.getGem(j, k);
+          if (gem.state === GemState.ALIVE) {
+            const matches = this.board.matchChain(j, k);
+            if (matches.length > 0) {
+              // Add unique matches to the cluster
+              for (const match of matches) {
+                // Check if this position is already in the cluster
+                const isDuplicate = newCluster.some(
+                  pos => pos.j === match.j && pos.k === match.k
+                );
+                
+                if (!isDuplicate) {
+                  newCluster.push(match);
+                }
               }
             }
           }
         }
       }
-    }
-    
-    // If new matches found, kill them and continue the cascade
-    if (newCluster.length > 0) {
-      console.log(`Found ${newCluster.length} new matches in cascade`);
-      // Process these matches, which will trigger another round of
-      // shiftDown and findAndProcessNewMatches when complete
-      this.kill(newCluster);
-    } else {
-      // No new matches, resume gameplay
-      this.pause = false;
-    }
+      
+      // If new matches found, kill them and continue the cascade
+      if (newCluster.length > 0) {
+        console.log(`Found ${newCluster.length} new matches in cascade`);
+        // Process these matches, which will trigger another round of
+        // shiftDown and findAndProcessNewMatches when complete
+        this.kill(newCluster);
+      } else {
+        // No new matches, resume gameplay
+        this.pause = false;
+      }
+    }, DEFAULT_SETTINGS.FALL_ANIMATION_DURATION + 100); // Wait for falling animation to complete
   }
 }

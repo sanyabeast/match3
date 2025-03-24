@@ -16,7 +16,7 @@ export class Gem {
     this._boardSize = boardSize;
     
     // Add CSS transition for smoother animations
-    this._elem.style.transition = 'top 0.15s ease-in, left 0.15s ease-in, transform 0.15s ease-out, opacity 0.15s ease-out';
+    this._elem.style.transition = 'top 0.3s cubic-bezier(0.215, 0.610, 0.355, 1.000), left 0.15s ease-in, transform 0.2s ease-out, opacity 0.15s ease-out';
   }
 
   /**
@@ -95,12 +95,20 @@ export class Gem {
     const j = parseInt(this._elem.getAttribute(DATA_ATTRIBUTES.J) || '0', 10);
     const k = parseInt(this._elem.getAttribute(DATA_ATTRIBUTES.K) || '0', 10);
     
-    // Reset transform and opacity
-    this._elem.style.transform = '';
+    // Reset transition to use a bounce effect for falling
+    this._elem.style.transition = `top ${DEFAULT_SETTINGS.FALL_ANIMATION_DURATION/1000}s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.15s ease-in, transform 0.2s ease-out, opacity 0.15s ease-out`;
+    
+    // Reset transform with a slight bounce effect
+    this._elem.style.transform = 'scale(1.05)';
     this._elem.style.opacity = '1';
     
     // Position the gem
     this._elem.style.top = `${j * (100/this._boardSize)}%`;
     this._elem.style.left = `${k * (100/this._boardSize)}%`;
+    
+    // Add a small delay and then reset the transform to normal scale
+    setTimeout(() => {
+      this._elem.style.transform = 'scale(1)';
+    }, DEFAULT_SETTINGS.BOUNCE_DELAY);
   }
 }
